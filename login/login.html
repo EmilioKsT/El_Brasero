@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>B-04 Iniciar sesión</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Tus estilos -->
+  <link rel="stylesheet" href="../css/estilos.css" />
+  <link rel="icon" href="data:,">
+</head>
+<body class="bg-light">
+
+  <div class="container d-flex justify-content-center align-items-center min-vh-100">
+    <div class="card shadow-lg p-4" style="max-width: 400px; width: 100%;">
+      <h3 class="text-center mb-3">Iniciar sesión</h3>
+
+      <!-- Alertas -->
+      <div id="msgLogin" class="alert d-none" role="alert"></div>
+
+      <form id="loginForm" novalidate>
+        <div class="mb-3">
+          <label for="loginEmail" class="form-label">Email</label>
+          <input type="email" class="form-control" id="loginEmail" placeholder="cliente@brasero.cl" required />
+          <div class="invalid-feedback">Ingresa un email válido.</div>
+        </div>
+
+        <div class="mb-2">
+          <label for="loginPassword" class="form-label">Contraseña</label>
+          <input type="password" class="form-control" id="loginPassword" placeholder="********" required />
+          <div class="invalid-feedback">El campo es obligatorio.</div>
+        </div>
+
+        <div class="d-flex justify-content-end mb-3">
+          <a href="#" class="small text-decoration-none opacity-75">¿Olvidaste tu contraseña? (simulado)</a>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Ingresar</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" defer></script>
+  <!-- Script exclusivo de login -->
+  <script src="../js/login.js" defer></script>
+</body>
+</html>

@@ -1,3 +1,4 @@
+// Bo3
 // Mock DB con usuarios de prueba
 const mockDB = ["cliente@brasero.cl", "prueba+1@brasero.cl"];
 

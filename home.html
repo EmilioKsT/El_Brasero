@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>El Brasero — Inicio</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- Estilos globales -->
+  <link rel="stylesheet" href="./css/estilos.css" />
+  <link rel="icon" href="data:,">
+</head>
+<body class="bg-light">
+
+  <!-- NAVBAR (Responsiva) -->
+  <nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+      <!-- Logo -->
+      <a class="navbar-brand fw-bold" href="./index.html">
+        <img src="./img/logo.svg" alt="El Brasero" width="28" height="28" class="rounded me-2 align-text-top">
+        El Brasero
+      </a>
+
+      <!-- Botón hamburguesa -->
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarBrasero" aria-controls="navbarBrasero" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <!-- Menú -->
+      <div class="collapse navbar-collapse" id="navbarBrasero">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center">
+          <li class="nav-item"><a class="nav-link" href="./home.html">Inicio</a></li>
+          <li class="nav-item"><a class="nav-link" href="./menu/index.html">Catálogo</a></li>
+          <li class="nav-item">
+            <a class="nav-link position-relative badged-link" href="./carrito/index.html">
+              Carrito
+              <!-- Badge fijo "2" (simulación) -->
+              <span class="cart-badge badge rounded-pill text-bg-danger">
+                2
+                <span class="visually-hidden">productos en el carrito</span>
+              </span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <!-- Texto AC: "Ingresar/Perfil" (simulado, sin lógica) -->
+            <a class="btn btn-outline-primary ms-lg-3" href="./login/login.html">Ingresar/Perfil</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header class="py-5 py-md-6 bg-white border-bottom">
+    <div class="container">
+      <div class="row align-items-center g-4">
+        <div class="col-12 col-md-6">
+          <h1 class="display-5 fw-bold mb-3">El mejor pollo a las brasas</h1>
+          <p class="lead text-muted mb-4">
+            Crujiente por fuera, jugoso por dentro. Pide online y disfruta en minutos.
+          </p>
+          <a class="btn btn-primary btn-lg" href="./menu/index.html">Ver catálogo</a>
+        </div>
+        <div class="col-12 col-md-6">
+          <!-- Imagen ilustrativa del hero (puedes reemplazar la ruta por la que tengas en /img) -->
+          <img src="./img/hero-pollo.jpg" class="img-fluid rounded-3 shadow-sm hero-img" alt="Pollo a las brasas">
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- FOOTER simple -->
+  <footer class="py-4">
+    <div class="container small text-center text-muted">
+      © 2025 El Brasero — Todos los derechos reservados
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" defer></script>
+</body>
+</html>

@@ -5,3 +5,12 @@ body {
 .card {
   border-radius: 12px;
 }
+
+/* B-07 */
+.navbar .navbar-brand img { object-fit: contain; }
+.hero-img { object-fit: cover; width: 100%; height: auto; }
+
+/* Separación vertical agradable en pantallas medianas+ */
+@media (min-width: 768px) {
+  .py-md-6 { padding-top: 5rem !important; padding-bottom: 5rem !important; }
+}

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>El Brasero — Carrito</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- Estilos globales -->
+  <link rel="stylesheet" href="../css/estilos.css" />
+  <link rel="icon" href="data:,">
+</head>
+<body class="bg-light b11">
+
+  <!-- NAVBAR (misma línea visual que B-07/B-08/B-10) -->
+  <nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="../index.html">
+        <img src="../img/logo.svg" alt="El Brasero" width="28" height="28" class="rounded me-2 align-text-top">
+        El Brasero
+      </a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarB11" aria-controls="navbarB11" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarB11">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center">
+          <li class="nav-item"><a class="nav-link" href="../home.html">Inicio</a></li>
+          <li class="nav-item"><a class="nav-link" href="../catalogo/GridProductos.html">Catálogo</a></li>
+          <li class="nav-item">
+            <a class="nav-link position-relative" href="./carrito.html" aria-current="page">
+              Carrito
+              <!-- Badge fijo de referencia (simulación navbar) -->
+              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill text-bg-danger">
+                <span id="navCartCount">0</span>
+                <span class="visually-hidden">productos en el carrito</span>
+              </span>
+            </a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="btn btn-outline-primary dropdown-toggle ms-lg-3" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Cuenta
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="../perfil/perfil.html">Perfil</a></li>
+              <li><a class="dropdown-item" href="../login/login.html">Ingresar</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- CONTENIDO -->
+  <main class="py-4 py-md-5">
+    <div class="container">
+      <h1 class="h3 mb-3">Tu carrito</h1>
+
+      <!-- Estado vacío -->
+      <div id="b11-empty" class="alert alert-light border d-none" role="status">
+        <div class="d-flex align-items-center">
+          <div class="me-3">
+            <span class="badge text-bg-secondary">Vacío</span>
+          </div>
+          <div>
+            <strong>Tu carrito está vacío.</strong>
+            <div class="text-muted small">Agrega productos desde el catálogo para continuar.</div>
+          </div>
+        </div>
+        <a class="btn btn-outline-primary btn-sm mt-3" href="../catalogo/GridProductos.html">Ir al catálogo</a>
+      </div>
+
+      <!-- Desktop / Tablet ≥ md: tabla + resumen lateral -->
+      <div class="row g-4 d-none d-md-flex">
+        <div class="col-12 col-lg-8">
+          <div class="card shadow-sm">
+            <div class="table-responsive">
+              <table class="table align-middle mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th scope="col">Producto</th>
+                    <th scope="col" class="text-end">Precio</th>
+                    <th scope="col" class="text-center">Cant.</th>
+                    <th scope="col" class="text-end">Subtotal</th>
+                    <th scope="col" class="text-center">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="b11-tbody">
+                  <!-- JS inyecta filas -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="d-flex gap-2 mt-3">
+            <button id="b11-clear" class="btn btn-outline-secondary">Vaciar carrito</button>
+            <a class="btn btn-outline-primary" href="../catalogo/GridProductos.html">Seguir comprando</a>
+          </div>
+        </div>
+
+        <div class="col-12 col-lg-4">
+          <div class="card shadow-sm p-4 position-sticky" style="top: 1rem;">
+            <h2 class="h5 mb-3">Resumen</h2>
+            <div class="d-flex justify-content-between mb-2">
+              <span>Total</span>
+              <strong id="b11-total">$ 0</strong>
+            </div>
+            <hr class="my-3">
+            <a id="b11-checkout" class="btn btn-primary w-100 disabled" aria-disabled="true" href="../checkout/index.html">
+              Ir a checkout
+            </a>
+            <p class="small text-muted mb-0 mt-2">* Simulado (sin backend).</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Móvil < md: cards + footer sticky -->
+      <div class="d-md-none">
+        <div id="b11-cards" class="vstack gap-3">
+          <!-- JS inyecta cards -->
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="py-4">
+    <div class="container small text-center text-muted">
+      © 2025 El Brasero — Carrito (Front simulado)
+    </div>
+  </footer>
+
+  <!-- Footer sticky móvil -->
+  <div id="b11-mobilebar" class="d-md-none fixed-bottom bg-white border-top shadow-sm py-2">
+    <div class="container d-flex align-items-center justify-content-between">
+      <div>
+        <div class="small text-muted mb-0">Total</div>
+        <div class="fw-bold" id="b11-total-m">$ 0</div>
+      </div>
+      <a id="b11-checkout-m" class="btn btn-primary disabled" aria-disabled="true" href="../checkout/index.html">
+        Ir a checkout
+      </a>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS + lógica -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" defer></script>
+  <script src="../js/carrito.js" defer></script>
+</body>
+</html>

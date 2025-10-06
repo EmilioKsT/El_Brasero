@@ -43,24 +43,41 @@
     flow.classList.remove("d-none");
   }
 
-  // Pintar resumen
+  // Pintar resumen con compatibilidad de claves y formatos
   const itemsBox = $("#b12-items");
   const subtotalEl = $("#b12-subtotal");
   const envioEl = $("#b12-envio");
   const totalEl = $("#b12-total");
 
-  const subtotal = cart.reduce((acc, it) => acc + it.precio * it.cant, 0);
+  // Helper para convertir "$ 14.990" o "14990" en número
+  const parseCLP = (v) => {
+    if (typeof v === "number") return v;
+    const n = String(v ?? "").replace(/[^\d]/g, "");
+    return n ? Number(n) : 0;
+  };
+
+  // Helper para obtener cantidad y precio aunque cambien los nombres
+  const getQty = (it) => Number(it.cant ?? it.cantidad ?? it.qty ?? 0) || 0;
+  const getPrice = (it) => parseCLP(it.precio ?? it.price ?? it.unitPrice);
+
+  // Calculamos líneas y totales
+  let subtotal = 0;
+  itemsBox.innerHTML = cart.map(it => {
+    const qty = getQty(it);
+    const price = getPrice(it);
+    const lineTotal = price * qty;
+    subtotal += lineTotal;
+    return `
+      <div class="d-flex justify-content-between small mb-1">
+        <span>${it.nombre ?? it.name ?? "Producto"} x${qty}</span>
+        <span>${toCLP(lineTotal)}</span>
+      </div>`;
+  }).join("");
+
   const envio = 0; // regla B-12
   const total = subtotal + envio;
 
-  // Listado simple de ítems
-  itemsBox.innerHTML = cart.map(it =>
-    `<div class="d-flex justify-content-between small mb-1">
-      <span>${it.nombre} x${it.cant}</span>
-      <span>${toCLP(it.precio * it.cant)}</span>
-    </div>`
-  ).join("");
-
+  // Mostrar cifras formateadas
   subtotalEl.textContent = toCLP(subtotal);
   envioEl.textContent = toCLP(envio);
   totalEl.textContent = toCLP(total);
@@ -100,6 +117,9 @@
     return ok;
   }
 
+  //helper para id de pedido
+  const makeOrderId = () => `BR-${(Date.now() % 1e6).toString().padStart(6, "0")}`;
+
   form.addEventListener("submit", (e) => {
     e.preventDefault();
     if (!validate()) return;
@@ -114,7 +134,23 @@
     };
     try { sessionStorage.setItem("brasero_checkout", JSON.stringify(datos)); } catch {}
 
+    //persistir datos que necesita B-13
+    try {
+      // total como número simple (stringificado)
+      sessionStorage.setItem("b12_total", String(Math.round(total)));
+      localStorage.setItem("b12_total", String(Math.round(total))); // respaldo opcional
+
+      // order_id (si no existe)
+      const orderId = sessionStorage.getItem("order_id") || makeOrderId();
+      sessionStorage.setItem("order_id", orderId);
+      localStorage.setItem("order_id", orderId); // opcional
+
+      // contador de items (opcional, para badge)
+      const itemsCount = cart.reduce((acc, it) => acc + (Number(it.cant || 0)), 0);
+      sessionStorage.setItem("cart_count", String(itemsCount));
+    } catch {}
+
     // Navega a B-13 (pago simulado)
-    window.location.href = "../confirmacion/index.html";
+    window.location.href = "../carrito/pago/pago.html";
   });
 })();

@@ -1,156 +1,95 @@
-// B-12 Checkout
-// AC: valida campos, muestra resumen CLP, envío $0, y continúa a B-13. (B-12 DoR)
-// Carrito: se toma de localStorage "brasero_cart" si existe; si no, se arma demo. (E3/E2)
-
+// B-12 Checkout 
 (function () {
-  const $ = (sel) => document.querySelector(sel);
+  const $ = (s) => document.querySelector(s);
 
-  // Util CLP
   const toCLP = (n) =>
     new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP", maximumFractionDigits: 0 })
       .format(n).replace("CLP", "").trim();
 
-  // Leer carrito (memoria/localStorage); si no hay, usar demo del AC
-  // Demo según B-12: Pollo entero familiar x1 (14990), Bebida 1.5L x2 (2200) => 19390 total
+  // Carrito (localStorage o demo)
   const demoCart = [
     { id: 3, nombre: "Pollo entero familiar", precio: 14990, cant: 1 },
-    { id: 6, nombre: "Bebida 1.5L", precio: 2200, cant: 2 },
+    { id: 6, nombre: "Bebida 1.5L",          precio:  2200, cant: 2 },
   ];
-
   let cart = [];
-  try {
-    const saved = localStorage.getItem("brasero_cart");
-    cart = saved ? JSON.parse(saved) : demoCart;
-  } catch { cart = demoCart; }
+  try { cart = JSON.parse(localStorage.getItem("brasero_cart") || "[]"); } catch {}
+  if (!cart.length) cart = demoCart;
 
-  // Navbar badge
+  // Badge
   const navCount = $("#navCartCount");
-  if (navCount) {
-    const items = cart.reduce((acc, it) => acc + it.cant, 0);
-    navCount.textContent = items;
-  }
+  if (navCount) navCount.textContent = cart.reduce((a, it) => a + (it.cant || 0), 0);
 
-  // Estados vacio/flujo
-  const boxEmpty = $("#b12-empty");
-  const flow = $("#b12-flow");
+  // Flujo
+  const boxEmpty = $("#b12-empty"), flow = $("#b12-flow");
+  if (!cart.length) { boxEmpty.classList.remove("d-none"); flow.classList.add("d-none"); return; }
+  boxEmpty.classList.add("d-none"); flow.classList.remove("d-none");
 
-  if (!cart || cart.length === 0) {
-    boxEmpty.classList.remove("d-none");
-    flow.classList.add("d-none");
-    return;
-  } else {
-    boxEmpty.classList.add("d-none");
-    flow.classList.remove("d-none");
-  }
-
-  // Pintar resumen con compatibilidad de claves y formatos
-  const itemsBox = $("#b12-items");
-  const subtotalEl = $("#b12-subtotal");
-  const envioEl = $("#b12-envio");
-  const totalEl = $("#b12-total");
-
-  // Helper para convertir "$ 14.990" o "14990" en número
-  const parseCLP = (v) => {
-    if (typeof v === "number") return v;
-    const n = String(v ?? "").replace(/[^\d]/g, "");
-    return n ? Number(n) : 0;
-  };
-
-  // Helper para obtener cantidad y precio aunque cambien los nombres
-  const getQty = (it) => Number(it.cant ?? it.cantidad ?? it.qty ?? 0) || 0;
+  // Resumen
+  const itemsBox = $("#b12-items"), subEl = $("#b12-subtotal"), envEl = $("#b12-envio"), totEl = $("#b12-total");
+  const parseCLP = (v) => Number(String(v ?? "").replace(/[^\d]/g, "")) || 0;
+  const getQty   = (it) => Number(it.cant ?? it.cantidad ?? it.qty) || 0;
   const getPrice = (it) => parseCLP(it.precio ?? it.price ?? it.unitPrice);
 
-  // Calculamos líneas y totales
   let subtotal = 0;
   itemsBox.innerHTML = cart.map(it => {
-    const qty = getQty(it);
-    const price = getPrice(it);
-    const lineTotal = price * qty;
-    subtotal += lineTotal;
-    return `
-      <div class="d-flex justify-content-between small mb-1">
-        <span>${it.nombre ?? it.name ?? "Producto"} x${qty}</span>
-        <span>${toCLP(lineTotal)}</span>
-      </div>`;
+    const qty = getQty(it), price = getPrice(it), line = qty * price; subtotal += line;
+    return `<div class="d-flex justify-content-between small mb-1">
+      <span>${it.nombre ?? it.name ?? "Producto"} x${qty}</span><span>${toCLP(line)}</span></div>`;
   }).join("");
 
-  const envio = 0; // regla B-12
-  const total = subtotal + envio;
+  const envio = 0, total = subtotal + envio;
+  subEl.textContent = toCLP(subtotal);
+  envEl.textContent = toCLP(envio);
+  totEl.textContent = toCLP(total);
 
-  // Mostrar cifras formateadas
-  subtotalEl.textContent = toCLP(subtotal);
-  envioEl.textContent = toCLP(envio);
-  totalEl.textContent = toCLP(total);
-
-  // Formulario y validaciones
-  const form = $("#b12-form");
-  const nombre = $("#b12-nombre");
-  const fono = $("#b12-fono");
-  const direccion = $("#b12-direccion");
-  const comuna = $("#b12-comuna");
-
-  function setInvalid(input, invalid) {
-    input.classList.toggle("is-invalid", invalid);
-    input.classList.toggle("is-valid", !invalid);
-  }
-
-  function validate() {
+  // Validaciones
+  const form = $("#b12-form"), nombre = $("#b12-nombre"), fono = $("#b12-fono"), dir = $("#b12-direccion"), comuna = $("#b12-comuna");
+  const setInvalid = (i, bad) => { i.classList.toggle("is-invalid", bad); i.classList.toggle("is-valid", !bad); };
+  const validate = () => {
     let ok = true;
-
-    // Nombre
-    setInvalid(nombre, !nombre.value.trim());
-    ok = ok && !!nombre.value.trim();
-
-    // Teléfono: 9-11 dígitos
-    const phoneOK = /^\d{9,11}$/.test((fono.value || "").trim());
-    setInvalid(fono, !phoneOK);
-    ok = ok && phoneOK;
-
-    // Dirección
-    setInvalid(direccion, !direccion.value.trim());
-    ok = ok && !!direccion.value.trim();
-
-    // Comuna
-    setInvalid(comuna, !comuna.value.trim());
-    ok = ok && !!comuna.value.trim();
-
+    setInvalid(nombre, !nombre.value.trim()); ok &&= !!nombre.value.trim();
+    const phoneOK = /^\d{9,11}$/.test((fono.value || "").trim()); setInvalid(fono, !phoneOK); ok &&= phoneOK;
+    setInvalid(dir, !dir.value.trim()); ok &&= !!dir.value.trim();
+    setInvalid(comuna, !comuna.value.trim()); ok &&= !!comuna.value.trim();
     return ok;
-  }
+  };
 
-  //helper para id de pedido
   const makeOrderId = () => `BR-${(Date.now() % 1e6).toString().padStart(6, "0")}`;
 
   form.addEventListener("submit", (e) => {
     e.preventDefault();
     if (!validate()) return;
 
+    // Guardar datos para B-13/B-14
     const datos = {
       nombre: nombre.value.trim(),
       fono: fono.value.trim(),
       email: ($("#b12-email")?.value || "").trim(),
-      direccion: direccion.value.trim(),
+      direccion: dir.value.trim(),
       comuna: comuna.value.trim(),
-      total,
+      total
     };
-    try { sessionStorage.setItem("brasero_checkout", JSON.stringify(datos)); } catch {}
 
-    //persistir datos que necesita B-13
     try {
-      // total como número simple (stringificado)
+      sessionStorage.setItem("brasero_checkout", JSON.stringify(datos));
       sessionStorage.setItem("b12_total", String(Math.round(total)));
-      localStorage.setItem("b12_total", String(Math.round(total))); // respaldo opcional
+      localStorage.setItem("b12_total",  String(Math.round(total)));
 
-      // order_id (si no existe)
-      const orderId = sessionStorage.getItem("order_id") || makeOrderId();
+      const orderId = sessionStorage.getItem("order_id") || localStorage.getItem("order_id") || makeOrderId();
       sessionStorage.setItem("order_id", orderId);
-      localStorage.setItem("order_id", orderId); // opcional
+      localStorage.setItem("order_id", orderId);
 
-      // contador de items (opcional, para badge)
-      const itemsCount = cart.reduce((acc, it) => acc + (Number(it.cant || 0)), 0);
+      const itemsCount = cart.reduce((a, it) => a + (Number(it.cant) || 0), 0);
       sessionStorage.setItem("cart_count", String(itemsCount));
     } catch {}
 
-    // Navega a B-13 (pago simulado)
-    window.location.href = "../carrito/pago/pago.html";
-  });
-})();
+    // --- Redirección a B-13 (pago) — fija a /carrito/pago/pago.html ---
+    const q = new URLSearchParams({ total: Math.round(total) }).toString();
+
+    // Detecta el root del proyecto según la URL actual (respeta mayúsculas/minúsculas)
+    const root = "/" + location.pathname.split("/").filter(Boolean)[0];
+
+    // Ir siempre a /carrito/pago/pago.html dentro del proyecto
+    window.location.href = `${root}/carrito/pago/pago.html?${q}`;
+  }); // <-- cierra el submit
+})();   // <-- cierra la IIFE

@@ -1,79 +1,172 @@
-// B-08 — Grid de productos (100% front simulado)
+(() => {
+  "use strict";
+  const B09_VERSION = "B09-robusto-1.0";
+  window.B09_VERSION = B09_VERSION;
+  console.debug("GridProductos.js cargado:", B09_VERSION, location.pathname);
 
-// Demo data (id, nombre, precio CLP, img opcional)
-const B08_PRODUCTOS = [
-  { id: 101, nombre: "Pollo a las brasas individual", precio: 6990,  img: "../img/pollo-individual.jpg" },
-  { id: 102, nombre: "1/2 Pollo con papas",           precio: 9990,  img: "../img/medio-pollo-papas.jpg" },
-  { id: 103, nombre: "Pollo entero familiar",          precio: 14990, img: "../img/pollo-familiar.jpg" },
-  { id: 104, nombre: "Combo 2 personas",               precio: 12990, img: "../img/combo-2.jpg" },
-  { id: 105, nombre: "Ensalada clásica",               precio: 3490,  img: "" },
-  { id: 106, nombre: "Bebida 1.5L",                    precio: 2200,  img: "../img/bebida-15.jpg" },
-];
+  /* Datos simulados */
+  const PRODUCTOS = [
+    { id: 1, nombre: "Pollo a las brasas individual", precio: 6990,  categoria: "Pollos",    img: "../img/pollo-1.jpg" },
+    { id: 2, nombre: "1/2 Pollo con papas",            precio: 9990,  categoria: "Pollos",    img: "../img/pollo-2.jpg" },
+    { id: 3, nombre: "Pollo entero familiar",          precio: 14990, categoria: "Pollos",    img: "../img/pollo-3.jpg" },
+    { id: 4, nombre: "Combo 2 personas",               precio: 12990, categoria: "Combos",    img: "../img/combo-2p.jpg" },
+    { id: 5, nombre: "Ensalada clásica",               precio: 3490,  categoria: "Ensaladas", img: "../img/ensalada.jpg" },
+    { id: 6, nombre: "Bebida 1.5L",                    precio: 2200,  categoria: "Bebidas",   img: "../img/bebida15.jpg" }
+  ];
 
-const $b08 = (sel) => document.querySelector(sel);
-const grid   = $b08("#b08-grid");
-const buscar = $b08("#b08-buscar");
-const orden  = $b08("#b08-orden");
+  /* Helpers */
+  const $  = (sel) => document.querySelector(sel);
+  const show = (el) => el && el.classList.remove("d-none");
+  const hide = (el) => el && el.classList.add("d-none");
+  const clp = (n) => new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP", maximumFractionDigits: 0 }).format(n);
 
-// Formateador CLP
-const fmtCLP = new Intl.NumberFormat("es-CL", {
-  style: "currency",
-  currency: "CLP",
-  maximumFractionDigits: 0
-});
-
-function crearCard(p) {
-  const col = document.createElement("div");
-  // 6-4-3-2-1
-  col.className = "col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2";
-
-  const media = p.img
-    ? `<img src="${p.img}" alt="${p.nombre}" class="card-img-top b08-img rounded-top">`
-    : `<div class="d-flex align-items-center justify-content-center bg-light-subtle text-muted b08-ph rounded-top" aria-label="Imagen no disponible">Imagen no disponible</div>`;
-
-  // Acceso directo a B-10 según árbol: /menu/detalle/index.html
-  const hrefB10 = `../menu/detalle/index.html?id=${encodeURIComponent(p.id)}`;
-
-  col.innerHTML = `
-    <div class="card h-100 shadow-sm b08-card">
-      ${media}
-      <div class="card-body d-flex flex-column">
-        <h2 class="h6 b08-title mb-2" title="${p.nombre}">${p.nombre}</h2>
-        <div class="fw-bold mb-3">${fmtCLP.format(p.precio)}</div>
-        <div class="mt-auto">
-          <a class="btn btn-primary w-100" href="${hrefB10}">Ver detalle</a>
+  function cardHTML(p) {
+    const imgSrc = p.img || "https://placehold.co/600x400?text=Imagen";
+    const imgAlt = p.img ? p.nombre : "Imagen no disponible";
+    return `
+      <div class="col-12 col-sm-6 col-lg-3">
+        <div class="card h-100 shadow-sm">
+          <img src="${imgSrc}" class="card-img-top" alt="${imgAlt}">
+          <div class="card-body">
+            <h2 class="h6 card-title text-truncate" title="${p.nombre}">${p.nombre}</h2>
+            <div class="d-flex align-items-center justify-content-between">
+              <span class="badge text-bg-light">${p.categoria}</span>
+              <strong>${clp(p.precio)}</strong>
+            </div>
+          </div>
+          <div class="card-footer bg-white">
+            <a class="btn btn-outline-primary w-100" href="../catalogo/detalle/detalles.html?id=${p.id}">Ver detalle</a>
+          </div>
         </div>
-      </div>
-    </div>
-  `;
-  return col;
-}
+      </div>`;
+  }
 
-function render(lista) {
-  grid.innerHTML = "";
-  lista.forEach(p => grid.appendChild(crearCard(p)));
-}
+  /* Estado */
+  const state = { q: "", categoria: "Todas", min: null, max: null };
 
-function filtrarYOrdenar() {
-  const q = (buscar.value || "").toLowerCase().trim();
-  let lista = B08_PRODUCTOS.filter(p => p.nombre.toLowerCase().includes(q));
+  function filtrar() {
+    const q = state.q.trim().toLowerCase();
+    const cat = state.categoria;
+    const min = state.min !== null && state.min !== "" ? Number(state.min) : null;
+    const max = state.max !== null && state.max !== "" ? Number(state.max) : null;
 
-  if (orden.value === "asc")  lista.sort((a, b) => a.precio - b.precio);
-  if (orden.value === "desc") lista.sort((a, b) => b.precio - a.precio);
+    return PRODUCTOS.filter(p => {
+      const matchTexto = q === "" ? true : p.nombre.toLowerCase().includes(q);
+      const matchCat   = (cat === "Todas") ? true : p.categoria === cat;
+      const precioOK   = (min === null || p.precio >= min) && (max === null || p.precio <= max);
+      return matchTexto && matchCat && precioOK;
+    });
+  }
 
-  render(lista);
-}
+  /* Garantiza que existan los nodos; si no, los crea */
+  function ensureNodes() {
+    const wrapper = document.querySelector("main .container") || document.body;
 
-buscar?.addEventListener("input", filtrarYOrdenar);
-orden?.addEventListener("change", filtrarYOrdenar);
+    let grid = document.getElementById("b09-grid");
+    if (!grid) {
+      grid = document.createElement("div");
+      grid.id = "b09-grid";
+      grid.className = "row g-3 g-md-4";
+      wrapper.appendChild(grid);
+      console.warn("Se creó #b09-grid porque no existía.");
+    }
 
-// Init
-render(B08_PRODUCTOS);
+    let empty = document.getElementById("b09-empty");
+    if (!empty) {
+      empty = document.createElement("div");
+      empty.id = "b09-empty";
+      empty.className = "text-center text-muted py-5 d-none";
+      empty.innerHTML = `
+        <p class="mb-3">No se encontraron productos con los criterios seleccionados.</p>
+        <button id="b09-empty-reset" class="btn btn-outline-secondary">Limpiar filtros</button>`;
+      wrapper.appendChild(empty);
+      empty.querySelector("#b09-empty-reset").addEventListener("click", limpiarFiltros);
+      console.warn("Se creó #b09-empty porque no existía.");
+    }
+    return { grid, empty };
+  }
 
-document.querySelector("#menuPerfilLink")?.addEventListener("click", (e) => {
-  e.preventDefault(); // no navegues todavía
-  alert("Accediendo a tu perfil (simulado)...\nRedirigiendo...");
-  setTimeout(() => {
-    window.location.href = "../perfil/perfil.html"; // ruta según tu árbol
-  }, 700);
-});
+  function render() {
+    const { grid, empty } = ensureNodes();
+    const list = filtrar();
+
+    if (list.length === 0) {
+      grid.innerHTML = "";
+      show(empty);
+    } else {
+      hide(empty);
+      grid.innerHTML = list.map(cardHTML).join("");
+    }
+  }
+
+  function syncMobileToDesktop() {
+    const cat = $("#b09-categoria-m")?.value ?? "Todas";
+    const min = $("#b09-min-m")?.value ?? "";
+    const max = $("#b09-max-m")?.value ?? "";
+    $("#b09-categoria") && ($("#b09-categoria").value = cat);
+    $("#b09-min") && ($("#b09-min").value = min);
+    $("#b09-max") && ($("#b09-max").value = max);
+  }
+  function syncDesktopToMobile() {
+    const cat = $("#b09-categoria")?.value ?? "Todas";
+    const min = $("#b09-min")?.value ?? "";
+    const max = $("#b09-max")?.value ?? "";
+    $("#b09-categoria-m") && ($("#b09-categoria-m").value = cat);
+    $("#b09-min-m") && ($("#b09-min-m").value = min);
+    $("#b09-max-m") && ($("#b09-max-m").value = max);
+  }
+
+  function limpiarFiltros() {
+    state.q = "";
+    state.categoria = "Todas";
+    state.min = null;
+    state.max = null;
+
+    $("#b09-buscar") && ($("#b09-buscar").value = "");
+    $("#b09-categoria") && ($("#b09-categoria").value = "Todas");
+    $("#b09-min") && ($("#b09-min").value = "");
+    $("#b09-max") && ($("#b09-max").value = "");
+    $("#b09-categoria-m") && ($("#b09-categoria-m").value = "Todas");
+    $("#b09-min-m") && ($("#b09-min-m").value = "");
+    $("#b09-max-m") && ($("#b09-max-m").value = "");
+
+    render();
+  }
+
+  function init() {
+    console.debug("B09 init — ¿existe #b09-grid?", !!document.getElementById("b09-grid"));
+
+    $("#b09-buscar")?.addEventListener("input", (e) => {
+      state.q = e.target.value || "";
+      render();
+    });
+
+    $("#b09-aplicar")?.addEventListener("click", () => {
+      state.categoria = $("#b09-categoria")?.value ?? "Todas";
+      state.min = $("#b09-min")?.value ?? "";
+      state.max = $("#b09-max")?.value ?? "";
+      syncDesktopToMobile();
+      render();
+    });
+    $("#b09-limpiar")?.addEventListener("click", limpiarFiltros);
+
+    $("#b09-aplicar-m")?.addEventListener("click", () => {
+      syncMobileToDesktop();
+      state.categoria = $("#b09-categoria")?.value ?? "Todas";
+      state.min = $("#b09-min")?.value ?? "";
+      state.max = $("#b09-max")?.value ?? "";
+      render();
+    });
+    $("#b09-limpiar-m")?.addEventListener("click", limpiarFiltros);
+
+    $("#b09-empty-reset")?.addEventListener("click", limpiarFiltros);
+
+    render();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();

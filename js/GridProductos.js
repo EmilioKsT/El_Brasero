@@ -6,10 +6,10 @@
 
   /* Datos simulados */
   const PRODUCTOS = [
-    { id: 1, nombre: "Pollo a las brasas individual", precio: 6990,  categoria: "Pollos",    img: "../img/pollo-1.jpg" },
-    { id: 2, nombre: "1/2 Pollo con papas",            precio: 9990,  categoria: "Pollos",    img: "../img/pollo-2.jpg" },
+    { id: 1, nombre: "Pollo a las brasas individual", precio: 6990,  categoria: "Pollos",    img: "../img/pollo-1.png" },
+    { id: 2, nombre: "1/2 Pollo con papas",            precio: 9990,  categoria: "Pollos",    img: "../img/pollo-2.png" },
     { id: 3, nombre: "Pollo entero familiar",          precio: 14990, categoria: "Pollos",    img: "../img/pollo-3.jpg" },
-    { id: 4, nombre: "Combo 2 personas",               precio: 12990, categoria: "Combos",    img: "../img/combo-2p.jpg" },
+    { id: 4, nombre: "Combo 2 personas",               precio: 12990, categoria: "Combos",    img: "../img/combo-2.jpg" },
     { id: 5, nombre: "Ensalada clásica",               precio: 3490,  categoria: "Ensaladas", img: "../img/ensalada.jpg" },
     { id: 6, nombre: "Bebida 1.5L",                    precio: 2200,  categoria: "Bebidas",   img: "../img/bebida15.jpg" }
   ];

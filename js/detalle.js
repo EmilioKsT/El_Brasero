@@ -1,12 +1,12 @@
 // B-10 Detalle de producto 
 // Datos de prueba coherentes con B-08 (id, nombre, precio, desc, img opcional)
 const PRODUCTS = [
-  { id: 1, nombre: "Pollo a las brasas individual", precio: 6990,  desc: "Porción individual con ensalada simple.", img: "../../img/prod-1.jpg" },
-  { id: 2, nombre: "1/2 Pollo con papas",           precio: 9990,  desc: "Medio pollo con papas fritas para compartir.", img: "../../img/prod-2.jpg" },
-  { id: 3, nombre: "Pollo entero familiar",         precio: 14990, desc: "Para 3–4 personas, incluye salsas.",          img: "../../img/prod-3.jpg" },
+  { id: 1, nombre: "Pollo a las brasas individual", precio: 6990,  desc: "Porción individual con ensalada simple.", img: "../../img/pollo-1.png" },
+  { id: 2, nombre: "1/2 Pollo con papas",           precio: 9990,  desc: "Medio pollo con papas fritas para compartir.", img: "../../img/pollo-2.png" },
+  { id: 3, nombre: "Pollo entero familiar",         precio: 14990, desc: "Para 3–4 personas, incluye salsas.",          img: "../../img/pollo-3.jpg" },
   { id: 4, nombre: "Combo 2 personas",              precio: 12990, desc: "1/2 pollo + papas + bebida.",                  img: "../../img/prod-4.jpg" },
-  { id: 5, nombre: "Ensalada clásica",              precio: 3490,  desc: "Lechuga, tomate, cebolla y aliño.",            img: "" },
-  { id: 6, nombre: "Bebida 1.5L",                   precio: 2200,  desc: "Bebida familiar de 1.5 litros.",               img: "../../img/prod-6.jpg" },
+  { id: 5, nombre: "Ensalada clásica",              precio: 3490,  desc: "Lechuga, tomate, cebolla y aliño.",            img: "../../img/ensalada.jpg" },
+  { id: 6, nombre: "Bebida 1.5L",                   precio: 2200,  desc: "Bebida familiar de 1.5 litros.",               img: "../../img/bebida15.jpg" },
 ];
 
 // Placeholder accesible cuando falta imagen

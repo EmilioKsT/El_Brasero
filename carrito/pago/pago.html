@@ -16,15 +16,18 @@
   <!-- NAVBAR -->
   <nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
     <div class="container">
-      <a class="navbar-brand fw-bold" href="../../index.html">
+      <!-- Logo -->
+      <a class="navbar-brand fw-bold" href="../../home.html">
         <img src="../../img/logo.png" alt="El Brasero" width="28" height="28" class="rounded me-2 align-text-top">
         El Brasero
       </a>
 
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarB13">
+      <!-- Botón hamburguesa -->
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarB13" aria-controls="navbarB13" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
 
+      <!-- Menú -->
       <div class="collapse navbar-collapse" id="navbarB13">
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center">
           <li class="nav-item"><a class="nav-link" href="../../home.html">Inicio</a></li>
@@ -38,19 +41,19 @@
               </span>
             </a>
           </li>
-          <li class="nav-item dropdown">
-            <a class="btn btn-outline-primary dropdown-toggle ms-lg-3" href="#" role="button" data-bs-toggle="dropdown">
-              Cuenta
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end">
-              <li><a class="dropdown-item" href="../../perfil/perfil.html">Perfil</a></li>
-              <li><a class="dropdown-item" href="../../login/login.html">Ingresar</a></li>
-            </ul>
+
+          <!-- Bloque dinámico (Cuenta ▾ / Perfil ▾ / Administración) -->
+          <li class="nav-item" id="navCuentaWrap">
+            <div id="navCuentaMount"></div>
           </li>
         </ul>
       </div>
     </div>
   </nav>
+
+  <!-- Script del navbar dinámico -->
+  <script src="../../js/nav-auth.js" defer></script>
+
 
   <!-- CONTENIDO -->
   <main class="py-4 py-md-5">

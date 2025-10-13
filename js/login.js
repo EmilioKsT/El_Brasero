@@ -1,11 +1,12 @@
+// ======= login.js v4 =======
+console.log("login.js v4 cargado en:", window.location.href);
+
 // ======= Config de simulación =======
 const VALID_EMAIL = "cliente@brasero.cl";
-const VALID_PASS  = "Clave2025"; 
+const VALID_PASS  = "Clave2025";
 
 // ======= Utilidades =======
-const isValidEmail = (email) => {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-};
+const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
 const showMsg = (el, type, text) => {
   el.classList.remove("d-none", "alert-success", "alert-danger");
@@ -13,7 +14,7 @@ const showMsg = (el, type, text) => {
   el.textContent = text;
 };
 
-// ======= Lógica B-04 =======
+// ======= Lógica B-04 (Login cliente simulado) =======
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("loginForm");
   const msg  = document.getElementById("msgLogin");
@@ -29,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const email = document.getElementById("loginEmail").value.trim().toLowerCase();
     const pass  = document.getElementById("loginPassword").value.trim();
 
-    // Campos vacíos
+    // Validación
     let hasError = false;
     if (!email) {
       document.getElementById("loginEmail").classList.add("is-invalid");
@@ -43,7 +44,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     if (hasError) return;
 
-    // Email inválido
     if (!isValidEmail(email)) {
       document.getElementById("loginEmail").classList.add("is-invalid");
       showMsg(msg, "err", "Ingresa un email válido");
@@ -52,17 +52,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Comprobación simulada
     const credsOK = (email === VALID_EMAIL && pass === VALID_PASS);
-
     if (!credsOK) {
       showMsg(msg, "err", "Credenciales incorrectas");
       return;
     }
 
-    // Éxito
-    showMsg(msg, "ok", "Login exitoso → Redirección a Panel (simulado)");
+    // ======= Éxito =======
+    showMsg(msg, "ok", "Login exitoso → Redirigiendo al catálogo…");
+
+    // Guardar “sesión” del cliente (para que el navbar muestre PERFIL)
+    sessionStorage.setItem("brasero_user", JSON.stringify({
+      email,
+      authed: true,
+      ts: Date.now()
+    }));
+
+    // Construir URL robusta desde /login/login.html
+    const targetURL = new URL("../catalogo/GridProductos.html", window.location.href).href;
+    console.log("Redirigiendo a:", targetURL);
+
+    // Redirigir (sin alert; el alert bloqueaba y era del código antiguo)
     setTimeout(() => {
-      alert("Login exitoso. Redirigiendo al Panel… (simulado)");
-      // window.location.href = "../panel/index.html"; // si quieres redirigir
-    }, 700);
+      try {
+        window.location.assign(targetURL);
+      } catch {
+        window.location.href = targetURL;
+      }
+    }, 400);
   });
 });

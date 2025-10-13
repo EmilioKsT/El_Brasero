@@ -43,9 +43,9 @@
               </span>
             </a>
           </li>
-          <li class="nav-item">
-            <!-- Texto AC: "Ingresar/Perfil" (simulado, sin lógica) -->
-            <a class="btn btn-outline-primary ms-lg-3" href="./login/login.html">Ingresar/Perfil</a>
+          <li class="nav-item" id="navCuentaWrap">
+            <!-- El JS insertará aquí: dropdown (sin sesión) o botón Perfil/Admin (con sesión) -->
+            <div id="navCuentaMount"></div>
           </li>
         </ul>
       </div>
@@ -80,5 +80,8 @@
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" defer></script>
+  <!-- JS para manejar el nav según si hay sesión o no -->
+  <script src="./js/nav-auth.js" defer></script>
+
 </body>
 </html>

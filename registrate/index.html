@@ -30,11 +30,37 @@
 
         <div class="mb-3">
           <label for="password" class="form-label">Contraseña</label>
-          <input type="password" class="form-control" id="password" placeholder="Mínimo 8 caracteres, 1 mayúscula y 1 número" required>
+          <input
+            type="password"
+            class="form-control"
+            id="password"
+            placeholder="Mínimo 8 caracteres, 1 mayúscula y 1 número"
+            pattern="(?=.*[A-Z])(?=.*\d).{8,}"
+            title="Al menos 8 caracteres, con 1 mayúscula y 1 número"
+             required
+          >
           <div class="invalid-feedback">La contraseña no cumple los requisitos.</div>
         </div>
 
+        <div class="mb-3">
+          <label for="password2" class="form-label">Repetir contraseña</label>
+          <input
+            type="password"
+            class="form-control"
+            id="password2"
+            placeholder="Repite tu contraseña"
+            required
+          >
+          <div class="invalid-feedback">Las contraseñas no coinciden.</div>
+        </div>
+
         <button type="submit" class="btn btn-primary w-100">Registrarme</button>
+
+        <div class="text-center mt-3">
+          <span class="small text-muted">¿Ya tienes cuenta?</span>
+          <a href="../login/login.html" class="small ms-1 text-decoration-none">Inicia sesión</a>
+        </div>
+
       </form>
     </div>
   </div>

@@ -6,21 +6,33 @@
   const mount = document.getElementById("navCuentaMount");
   if (!mount) return;
 
-  // 1) Detectar raíz del proyecto (primer segmento después del host)
-  //    p.ej. /EL_Brasero/catalogo/GridProductos.html  => root = "EL_Brasero"
-  //    p.ej. /home.html (sin carpeta)                 => root = ""
-  const segs = location.pathname.split("/").filter(Boolean);
-  const root = segs[0] || "";
-  const BASE = root ? `/${root}/` : `/`; // <- SIEMPRE ABSOLUTO
+  // 1) Detectar la raíz real del proyecto a partir de la ubicación del script.
+  //    Esto evita suposiciones según la URL actual (que fallaban al abrir los
+  //    HTML directamente con file:// o cuando el sitio vive en un subdirectorio).
+  const resolveBaseURL = () => {
+    const current = document.currentScript;
+    if (current?.src) return new URL(current.src, window.location.href);
 
-  // 2) URLs absolutas correctas desde cualquier carpeta
-  const URLS = {
-    loginUser : `${BASE}login/login.html`,
-    perfil    : `${BASE}perfil/perfil.html`,
-    adminLogin: `${BASE}admin/login.html`,
-    adminHome : `${BASE}admin/admin.html`,
+ const fallback = Array.from(document.querySelectorAll("script"))
+      .reverse()
+      .find((el) => /nav-auth\.js(?:\?|$)/.test(el.src || ""));
+    if (fallback?.src) return new URL(fallback.src, window.location.href);
+
+    return new URL(window.location.href);
   };
 
+  const scriptURL = resolveBaseURL();
+  const baseURL = new URL("../", scriptURL); // carpeta /front/ (o raíz del sitio)
+
+  // 2) URLs absolutas correctas desde cualquier carpeta / protocolo.
+  const URLS = {
+    loginUser : new URL("login/login.html", baseURL).href,
+    perfil    : new URL("perfil/perfil.html", baseURL).href,
+    adminLogin: new URL("admin/login.html", baseURL).href,
+    adminHome : new URL("admin/admin.html", baseURL).href,
+    home      : new URL("home.html", baseURL).href,
+  };
+  
   const isUser = () => {
     try { return !!(JSON.parse(sessionStorage.getItem(KEY_USER))?.authed); } catch { return false; }
   };
@@ -65,8 +77,7 @@
         sessionStorage.removeItem("brasero_user");
 
         // Redirigir a la página principal (home)
-        const target = new URL(`${BASE}home.html`, window.location.href).href;
-        window.location.assign(target);
+        window.location.assign(URLS.home);
       });
     }
   }

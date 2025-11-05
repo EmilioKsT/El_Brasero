@@ -83,13 +83,11 @@
       sessionStorage.setItem("cart_count", String(itemsCount));
     } catch {}
 
-    // --- Redirección a B-13 (pago) — fija a /carrito/pago/pago.html ---
+    // --- Redirección a B-13 (pago) ---
     const q = new URLSearchParams({ total: Math.round(total) }).toString();
 
-    // Detecta el root del proyecto según la URL actual (respeta mayúsculas/minúsculas)
-    const root = "/" + location.pathname.split("/").filter(Boolean)[0];
-
-    // Ir siempre a /carrito/pago/pago.html dentro del proyecto
-    window.location.href = `${root}/carrito/pago/pago.html?${q}`;
+    const target = new URL("../carrito/pago/pago.html", window.location.href);
+    target.search = `?${q}`;
+    window.location.href = target.href;
   }); // <-- cierra el submit
 })();   // <-- cierra la IIFE

@@ -6,33 +6,25 @@
   const mount = document.getElementById("navCuentaMount");
   if (!mount) return;
 
-  // 1) Detectar la raíz real del proyecto a partir de la ubicación del script.
-  //    Esto evita suposiciones según la URL actual (que fallaban al abrir los
-  //    HTML directamente con file:// o cuando el sitio vive en un subdirectorio).
-  const resolveBaseURL = () => {
-    const current = document.currentScript;
-    if (current?.src) return new URL(current.src, window.location.href);
+    // 1) Calcular la raíz real del sitio tomando como referencia el propio script.
+  //    Esto evita asumir que el primer segmento del pathname sea la carpeta base,
+  //    lo cual rompía los enlaces en rutas anidadas (p. ej. /catalogo/detalle/...).
+  const currentScript = document.currentScript || document.querySelector('script[src*="nav-auth.js"]');
+  if (!currentScript) return;
 
- const fallback = Array.from(document.querySelectorAll("script"))
-      .reverse()
-      .find((el) => /nav-auth\.js(?:\?|$)/.test(el.src || ""));
-    if (fallback?.src) return new URL(fallback.src, window.location.href);
+  const scriptUrl = new URL(currentScript.getAttribute("src"), window.location.href);
+  const baseUrl = new URL("../", scriptUrl); // carpeta raíz del front (con slash final)
 
-    return new URL(window.location.href);
-  };
-
-  const scriptURL = resolveBaseURL();
-  const baseURL = new URL("../", scriptURL); // carpeta /front/ (o raíz del sitio)
+  const mk = (path) => new URL(path, baseUrl).pathname; // siempre devuelve /ruta/correcta
 
   // 2) URLs absolutas correctas desde cualquier carpeta / protocolo.
   const URLS = {
-    loginUser : new URL("login/login.html", baseURL).href,
-    perfil    : new URL("perfil/perfil.html", baseURL).href,
-    adminLogin: new URL("admin/login.html", baseURL).href,
-    adminHome : new URL("admin/admin.html", baseURL).href,
-    home      : new URL("home.html", baseURL).href,
+    loginUser : mk("login/login.html"),
+    perfil    : mk("perfil/perfil.html"),
+    adminLogin: mk("admin/login.html"),
+    adminHome : mk("admin/admin.html"),
   };
-  
+
   const isUser = () => {
     try { return !!(JSON.parse(sessionStorage.getItem(KEY_USER))?.authed); } catch { return false; }
   };
@@ -77,7 +69,7 @@
         sessionStorage.removeItem("brasero_user");
 
         // Redirigir a la página principal (home)
-        window.location.assign(URLS.home);
+        window.location.assign(mk("home.html"));      
       });
     }
   }

@@ -86,8 +86,15 @@
     // --- Redirección a B-13 (pago) ---
     const q = new URLSearchParams({ total: Math.round(total) }).toString();
 
-    const target = new URL("../carrito/pago/pago.html", window.location.href);
-    target.search = `?${q}`;
-    window.location.href = target.href;
+    // Detecta el directorio "front" para conservar rutas anidadas
+    const path = location.pathname;
+    const frontMatch = path.match(/^(.*\/front)\//i);
+    let base = frontMatch ? frontMatch[1] : "";
+
+    if (!base) {
+      const parts = path.split("/").filter(Boolean);
+      base = parts.length ? `/${parts[0]}` : "";
+    }
+    window.location.href = `${base}/carrito/pago/pago.html?${q}`;  
   }); // <-- cierra el submit
 })();   // <-- cierra la IIFE

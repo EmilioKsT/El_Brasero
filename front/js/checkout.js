@@ -84,17 +84,14 @@
     } catch {}
 
     // --- Redirección a B-13 (pago) ---
+    // --- Redirección a B-13 (pago) ---
+    // TOTAL en query (si no lo quieres en la URL, quita "?${q}" y léelo desde storage en pago.html)
     const q = new URLSearchParams({ total: Math.round(total) }).toString();
 
-    // Detecta el directorio "front" para conservar rutas anidadas
-    const path = location.pathname;
-    const frontMatch = path.match(/^(.*\/front)\//i);
-    let base = frontMatch ? frontMatch[1] : "";
+    // 100% directo al archivo correcto:
+    const ABS_URL = `${location.origin}/El_Brasero/front/carrito/pago/pago.html`;
+    window.location.assign(`${ABS_URL}?${q}`);
 
-    if (!base) {
-      const parts = path.split("/").filter(Boolean);
-      base = parts.length ? `/${parts[0]}` : "";
-    }
-    window.location.href = `${base}/carrito/pago/pago.html?${q}`;  
+ 
   }); // <-- cierra el submit
 })();   // <-- cierra la IIFE

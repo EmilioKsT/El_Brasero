@@ -8,33 +8,35 @@
   <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
 
-  <!-- Estilos globales -->
-  <link rel="stylesheet" href="../css/estilos.css" />
+  <!-- Estilos globales (rutas absolutas para evitar fallos) -->
+  <link rel="stylesheet" href="/El_Brasero/front/css/estilos.css" />
   <link rel="icon" href="data:,">
 </head>
+
 <body class="bg-light b09">
 
   <!-- NAVBAR -->
   <nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
     <div class="container">
       <!-- Logo -->
-      <a class="navbar-brand fw-bold" href="../home.html">
-        <img src="../img/logo.png" alt="El Brasero" width="28" height="28" class="rounded me-2 align-text-top">
+      <a class="navbar-brand fw-bold" href="/El_Brasero/front/home.html">
+        <img src="/El_Brasero/front/img/logo.png" alt="El Brasero" width="28" height="28" class="rounded me-2 align-text-top">
         El Brasero
       </a>
 
       <!-- Botón hamburguesa -->
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarB09" aria-controls="navbarB09" aria-expanded="false" aria-label="Toggle navigation">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarB09"
+              aria-controls="navbarB09" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
 
       <!-- Menú -->
       <div class="collapse navbar-collapse" id="navbarB09">
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center">
-          <li class="nav-item"><a class="nav-link" href="../home.html">Inicio</a></li>
-          <li class="nav-item"><a class="nav-link active" aria-current="page" href="../catalogo/GridProductos.html">Catálogo</a></li>
+          <li class="nav-item"><a class="nav-link" href="/El_Brasero/front/home.html">Inicio</a></li>
+          <li class="nav-item"><a class="nav-link active" aria-current="page" href="/El_Brasero/front/catalogo/GridProductos.html">Catálogo</a></li>
           <li class="nav-item">
-            <a class="nav-link position-relative" href="../carrito/carrito.html">
+            <a class="nav-link position-relative" href="/El_Brasero/front/carrito/carrito.html">
               Carrito
               <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill text-bg-danger">
                 2 <span class="visually-hidden">productos en el carrito</span>
@@ -44,7 +46,6 @@
 
           <!-- Bloque dinámico (cuenta / perfil / admin) -->
           <li class="nav-item" id="navCuentaWrap">
-            <!-- El JS insertará aquí: dropdown (sin sesión) o botón Perfil/Admin (con sesión) -->
             <div id="navCuentaMount"></div>
           </li>
         </ul>
@@ -52,15 +53,11 @@
     </div>
   </nav>
 
-  <!-- Script del navbar dinámico -->
-  <script src="../js/nav-auth.js" defer></script>
-
-
   <!-- CONTENIDO -->
   <main class="py-4 py-md-5">
     <div class="container">
 
-      <!-- Título + buscador (siempre visible) -->
+      <!-- Título + buscador -->
       <div class="row g-3 align-items-md-center mb-3">
         <div class="col-12 col-md">
           <h1 class="h3 mb-0">Catálogo</h1>
@@ -70,8 +67,7 @@
         </div>
       </div>
 
-      <!-- Filtros -->
-      <!-- Desktop/Tablet: fila visible -->
+      <!-- Filtros (desktop/tablet) -->
       <div class="d-none d-md-block">
         <div class="row g-2 align-items-end mb-3">
           <div class="col-12 col-lg-3">
@@ -101,7 +97,7 @@
         </div>
       </div>
 
-      <!-- Móvil: filtros en acordeón -->
+      <!-- Filtros (móvil en acordeón) -->
       <div class="d-md-none mb-3">
         <div class="accordion" id="b09-acc">
           <div class="accordion-item">
@@ -165,6 +161,12 @@
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" defer></script>
-  <script src="../js/GridProductos.js" defer></script>
+
+  <!-- Navbar dinámico -->
+  <script src="/El_Brasero/front/js/nav-auth.js?v=3" defer></script>
+
+  <!-- Lógica del catálogo -->
+  <script src="/El_Brasero/front/js/GridProductos.js" defer></script>
 </body>
 </html>
+

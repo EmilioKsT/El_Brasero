@@ -1,86 +1,95 @@
-// /js/nav-auth.js
+// /El_Brasero/front/js/nav-auth.js — versión estable (rutas absolutas fijas)
 (() => {
-  const KEY_USER  = "brasero_user";        // { email, authed:true }
-  const KEY_ADMIN = "brasero_admin_auth";  // { email, authed:true }
+  const KEY_USER  = "brasero_user";
+  const KEY_ADMIN = "brasero_admin_auth";
 
   const mount = document.getElementById("navCuentaMount");
   if (!mount) return;
 
-    // 1) Calcular la raíz real del sitio tomando como referencia el propio script.
-  //    Esto evita asumir que el primer segmento del pathname sea la carpeta base,
-  //    lo cual rompía los enlaces en rutas anidadas (p. ej. /catalogo/detalle/...).
-  const currentScript = document.currentScript || document.querySelector('script[src*="nav-auth.js"]');
-  if (!currentScript) return;
-
-  const scriptUrl = new URL(currentScript.getAttribute("src"), window.location.href);
-  const baseUrl = new URL("../", scriptUrl); // carpeta raíz del front (con slash final)
-
-  const mk = (path) => new URL(path, baseUrl).pathname; // siempre devuelve /ruta/correcta
-
-  // 2) URLs absolutas correctas desde cualquier carpeta / protocolo.
+  // Rutas absolutas correctas desde cualquier página
+  const ORIGIN = location.origin;
+  const ROOT   = "/El_Brasero/front";
   const URLS = {
-    loginUser : mk("login/login.html"),
-    perfil    : mk("perfil/perfil.html"),
-    adminLogin: mk("admin/login.html"),
-    adminHome : mk("admin/admin.html"),
+    home      : `${ORIGIN}${ROOT}/home.html`,
+    loginUser : `${ORIGIN}${ROOT}/login/login.html`,
+    perfil    : `${ORIGIN}${ROOT}/perfil/perfil.html`,
+    adminLogin: `${ORIGIN}${ROOT}/admin/login.html`,
+    adminHome : `${ORIGIN}${ROOT}/admin/admin.html`,
   };
 
-  const isUser = () => {
-    try { return !!(JSON.parse(sessionStorage.getItem(KEY_USER))?.authed); } catch { return false; }
+  const parse = (v) => { try { return JSON.parse(v); } catch { return null; } };
+  const get   = (k) => parse(sessionStorage.getItem(k)) || parse(localStorage.getItem(k));
+
+  const u = get(KEY_USER);
+  const a = get(KEY_ADMIN);
+  const isUser  = !!(u && (u.authed === true || u.authed === "true"));
+  const isAdmin = !!(a && (a.authed === true || a.authed === "true"));
+
+  const dropdown = (label, items) => `
+    <div class="dropdown">
+      <button class="btn btn-outline-primary dropdown-toggle ms-lg-3"
+              type="button" id="navCuentaBtn" data-bs-toggle="dropdown" aria-expanded="false">
+        ${label}
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navCuentaBtn">
+        ${items}
+      </ul>
+    </div>
+  `;
+
+  const bindLogout = () => {
+    const btn = document.getElementById("navLogout");
+    if (!btn) return;
+    btn.addEventListener("click", () => {
+      try {
+        sessionStorage.removeItem(KEY_USER);
+        localStorage.removeItem(KEY_USER);
+        sessionStorage.removeItem(KEY_ADMIN);
+        localStorage.removeItem(KEY_ADMIN);
+      } catch {}
+      window.location.assign(URLS.home);
+    });
   };
-  const isAdmin = () => {
-    try { return !!(JSON.parse(sessionStorage.getItem(KEY_ADMIN))?.authed); } catch { return false; }
-  };
 
-  function renderDropdown() {
-    mount.innerHTML = `
-      <div class="dropdown">
-        <a class="btn btn-outline-primary dropdown-toggle ms-lg-3" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-          Cuenta
-        </a>
-        <ul class="dropdown-menu dropdown-menu-end">
-          <li><a class="dropdown-item" href="${URLS.loginUser}">Ingresar</a></li>
-          <li><a class="dropdown-item" href="${URLS.adminLogin}">Administración</a></li>
-        </ul>
-      </div>
-    `;
-  }
-  
-  function renderPerfilBtn() {
-    // Dropdown con opciones: Ver perfil y Cerrar sesión
-    mount.innerHTML = `
-      <div class="dropdown">
-        <a class="btn btn-outline-primary dropdown-toggle ms-lg-3" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-          Perfil
-        </a>
-        <ul class="dropdown-menu dropdown-menu-end">
-          <li><a class="dropdown-item" href="${URLS.perfil}">Ver perfil</a></li>
-          <li><hr class="dropdown-divider"></li>
-          <li><button class="dropdown-item text-danger" id="logoutClientBtn" type="button">Cerrar sesión</button></li>
-        </ul>
-      </div>
-    `;
-
-    // Agregar funcionalidad al botón Cerrar sesión
-    const btnLogout = document.getElementById("logoutClientBtn");
-    if (btnLogout) {
-      btnLogout.addEventListener("click", () => {
-        // Eliminar la sesión del cliente
-        sessionStorage.removeItem("brasero_user");
-
-        // Redirigir a la página principal (home)
-        window.location.assign(mk("home.html"));      
-      });
-    }
+  if (!isUser && !isAdmin) {
+    // Usuario anónimo
+    mount.innerHTML = dropdown("Cuenta", `
+      <li><a class="dropdown-item" href="${URLS.loginUser}">Ingresar</a></li>
+      <li><a class="dropdown-item" href="${URLS.adminLogin}">Administración</a></li>
+    `);
+    return;
   }
 
-  function renderAdminBtn() {
-    mount.innerHTML = `<a class="btn btn-primary ms-lg-3" href="${URLS.adminHome}">Administración</a>`;
+  if (isAdmin && !isUser) {
+    // Solo admin logueado
+    mount.innerHTML = dropdown("Cuenta", `
+      <li><a class="dropdown-item" href="${URLS.adminHome}">Administración</a></li>
+      <li><hr class="dropdown-divider"></li>
+      <li><button class="dropdown-item text-danger" id="navLogout" type="button">Cerrar sesión</button></li>
+    `);
+    bindLogout();
+    return;
   }
 
-  // 3) Render según estado
-  if (isAdmin()) renderAdminBtn();
-  else if (isUser()) renderPerfilBtn();
-  else renderDropdown();
+  if (isUser && !isAdmin) {
+    // Solo usuario logueado
+    const nombre = u?.nombre || "Perfil";
+    mount.innerHTML = dropdown(nombre, `
+      <li><a class="dropdown-item" href="${URLS.perfil}">Ver perfil</a></li>
+      <li><hr class="dropdown-divider"></li>
+      <li><button class="dropdown-item text-danger" id="navLogout" type="button">Cerrar sesión</button></li>
+    `);
+    bindLogout();
+    return;
+  }
+
+  // Usuario y admin activos
+  const nombre = u?.nombre || "Cuenta";
+  mount.innerHTML = dropdown(nombre, `
+    <li><a class="dropdown-item" href="${URLS.perfil}">Ver perfil</a></li>
+    <li><a class="dropdown-item" href="${URLS.adminHome}">Administración</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><button class="dropdown-item text-danger" id="navLogout" type="button">Cerrar sesión</button></li>
+  `);
+  bindLogout();
 })();
-

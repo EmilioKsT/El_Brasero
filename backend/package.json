@@ -1,0 +1,25 @@
+{
+  "name": "el-brasero-backend",
+  "version": "1.0.0",
+  "description": "Backend REST API para El Brasero - Sistema de pedidos de pollo a las brasas",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["fastify", "rest", "api", "mongodb"],
+  "author": "Emilio Castillo",
+  "license": "ISC",
+  "dependencies": {
+    "@fastify/cors": "^9.0.1",
+    "@fastify/jwt": "^8.0.0",
+    "dotenv": "^16.4.5",
+    "fastify": "^4.26.0",
+    "mongoose": "^8.2.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}

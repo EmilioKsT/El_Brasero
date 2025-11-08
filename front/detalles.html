@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>El Brasero — Detalle de producto</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- Estilos globales -->
+  <link rel="stylesheet" href="./css/estilos.css" />
+  <link rel="icon" href="data:,">
+</head>
+<body class="bg-light b10">
+
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+      <!-- Logo -->
+      <a class="navbar-brand fw-bold" href="./home.html">
+        <img src="./img/logo.png" alt="El Brasero" width="28" height="28" class="rounded me-2 align-text-top">
+        El Brasero
+      </a>
+
+      <!-- Botón hamburguesa -->
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarB10" aria-controls="navbarB10" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <!-- Menú -->
+      <div class="collapse navbar-collapse" id="navbarB10">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center">
+          <li class="nav-item"><a class="nav-link" href="./home.html">Inicio</a></li>
+          <li class="nav-item"><a class="nav-link" href="./GridProductos.html">Catálogo</a></li>
+          <li class="nav-item">
+            <a class="nav-link position-relative" href="./carrito.html">
+              Carrito
+              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill text-bg-danger">
+                2 <span class="visually-hidden">productos en el carrito</span>
+              </span>
+            </a>
+          </li>
+
+          <!-- Bloque dinámico (cuenta / perfil / admin) -->
+          <li class="nav-item" id="navCuentaWrap">
+            <div id="navCuentaMount"></div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- CONTENIDO -->
+  <main class="py-4 py-md-5">
+    <div class="container">
+
+      <!-- Breadcrumb simple -->
+      <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb mb-0">
+          <li class="breadcrumb-item"><a href="./home.html">Inicio</a></li>
+          <li class="breadcrumb-item"><a href="./GridProductos.html">Catálogo</a></li>
+          <li id="b10-crumb" class="breadcrumb-item active" aria-current="page">Detalle</li>
+        </ol>
+      </nav>
+
+      <div class="row g-4">
+        <!-- Columna imagen -->
+        <div class="col-12 col-md-6">
+          <div class="card shadow-sm">
+            <img id="b10-img" class="card-img-top" src="" alt="Imagen del producto" loading="lazy">
+          </div>
+        </div>
+
+        <!-- Columna info -->
+        <div class="col-12 col-md-6">
+          <div class="card shadow-sm p-4 h-100">
+            <h1 id="b10-nombre" class="h3 mb-2">Producto</h1>
+            <p id="b10-desc" class="text-muted mb-3">Descripción breve del producto.</p>
+
+            <div class="d-flex align-items-baseline gap-2 mb-3">
+              <span class="text-muted">Precio:</span>
+              <strong id="b10-precio" class="fs-4">$ 0</strong>
+            </div>
+
+            <div class="row g-3 align-items-end mb-3">
+              <div class="col-6 col-sm-4">
+                <label for="b10-cant" class="form-label mb-1">Cantidad</label>
+                <select id="b10-cant" class="form-select">
+                  <!-- 1..10 via JS -->
+                </select>
+              </div>
+              <div class="col-12 col-sm">
+                <button id="b10-add" class="btn btn-primary w-100">Agregar al carrito</button>
+              </div>
+            </div>
+
+            <a class="btn btn-outline-secondary w-100" href="./GridProductos.html">Volver al catálogo</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mensaje sin producto -->
+      <div id="b10-notfound" class="alert alert-warning mt-4 d-none" role="alert">
+        No se encontró el producto solicitado. <a class="alert-link" href="./GridProductos.html">Volver al catálogo</a>.
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="py-4">
+    <div class="container small text-center text-muted">
+      © 2025 El Brasero — Detalle (Front simulado)
+    </div>
+  </footer>
+
+  <!-- Toast (éxito agregar) -->
+  <div class="position-fixed bottom-0 start-50 translate-middle-x p-3" style="z-index: 1080">
+    <div id="b10-toast" class="toast align-items-center text-bg-success border-0" role="status" aria-live="polite" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body">
+          Producto agregado (simulado)
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Cerrar"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS + Lógica B-10 -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>El Brasero — Checkout</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- Estilos globales (ruta absoluta para evitar fallos) -->
+  <link rel="stylesheet" href="./css/estilos.css" />
+  <link rel="icon" href="data:,">
+</head>
+
+<body class="bg-light b12">
+
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+      <!-- Logo -->
+      <a class="navbar-brand fw-bold" href="./home.html">
+        <img src="./img/logo.png" alt="El Brasero" width="28" height="28" class="rounded me-2 align-text-top">
+        El Brasero
+      </a>
+
+      <!-- Botón hamburguesa -->
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarB12"
+              aria-controls="navbarB12" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <!-- Menú -->
+      <div class="collapse navbar-collapse" id="navbarB12">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center">
+          <li class="nav-item"><a class="nav-link" href="./home.html">Inicio</a></li>
+          <li class="nav-item"><a class="nav-link" href="./GridProductos.html">Catálogo</a></li>
+          <li class="nav-item">
+            <a class="nav-link position-relative" href="./carrito.html">
+              Carrito
+              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill text-bg-danger">
+                <span id="navCartCount">0</span>
+                <span class="visually-hidden">productos en el carrito</span>
+              </span>
+            </a>
+          </li>
+
+          <li class="nav-item" id="navCuentaWrap">
+            <div id="navCuentaMount"></div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- CONTENIDO -->
+  <main class="py-4 py-md-5">
+    <div class="container">
+      <h1 class="h4 mb-3">Checkout</h1>
+
+      <div id="b12-empty" class="alert alert-light border d-none" role="status">
+        <div class="d-flex align-items-center">
+          <div class="me-3"><span class="badge text-bg-secondary">Vacío</span></div>
+          <div>
+            <strong>No tienes ítems para pagar.</strong>
+            <div class="text-muted small">Agrega productos desde el carrito para continuar.</div>
+          </div>
+        </div>
+        <a class="btn btn-outline-primary btn-sm mt-3" href="./carrito.html">Volver al carrito</a>
+      </div>
+
+      <div id="b12-flow" class="row g-4 d-none">
+        <!-- Datos del cliente -->
+        <div class="col-12 col-md-7 col-lg-8">
+          <div class="card shadow-sm p-4 h-100">
+            <h2 class="h5 mb-3">Datos del cliente</h2>
+            <form id="b12-form" novalidate>
+              <div class="mb-3">
+                <label for="b12-nombre" class="form-label">Nombre</label>
+                <input id="b12-nombre" type="text" class="form-control" placeholder="Juan Pérez" required>
+              </div>
+
+              <div class="mb-3">
+                <label for="b12-fono" class="form-label">Teléfono</label>
+                <input id="b12-fono" type="tel" inputmode="numeric" class="form-control" placeholder="987654321" required>
+              </div>
+
+              <div class="mb-3">
+                <label for="b12-email" class="form-label">Email (lectura)</label>
+                <input id="b12-email" type="email" class="form-control" value="cliente@brasero.cl" readonly>
+              </div>
+
+              <div class="mb-3">
+                <label for="b12-direccion" class="form-label">Dirección</label>
+                <input id="b12-direccion" type="text" class="form-control" placeholder="Calle 123" required>
+              </div>
+
+              <div class="mb-3">
+                <label for="b12-comuna" class="form-label">Comuna</label>
+                <input id="b12-comuna" type="text" class="form-control" placeholder="Santiago" required>
+              </div>
+
+              <div class="d-flex flex-column flex-sm-row gap-2 mt-2">
+                <a href="./carrito.html" class="btn btn-outline-secondary flex-fill">Volver al carrito</a>
+                <button id="b12-submit" type="submit" class="btn btn-primary flex-fill">
+                  Confirmar y continuar a pago
+                </button>
+              </div>
+              <p class="small text-muted mb-0 mt-2">* Flujo simulado (sin backend).</p>
+            </form>
+          </div>
+        </div>
+
+        <!-- Resumen -->
+        <div class="col-12 col-md-5 col-lg-4">
+          <div class="card shadow-sm p-4">
+            <h2 class="h5 mb-3">Resumen</h2>
+
+            <div id="b12-items" class="mb-3"></div>
+
+            <div class="d-flex justify-content-between mb-2">
+              <span>Subtotal</span>
+              <strong id="b12-subtotal">$ 0</strong>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+              <span>Envío</span>
+              <strong id="b12-envio">$ 0</strong>
+            </div>
+            <hr class="my-3">
+            <div class="d-flex justify-content-between">
+              <span class="fw-semibold">Total</span>
+              <strong id="b12-total" class="fw-bold">$ 0</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="py-4">
+    <div class="container small text-center text-muted">
+      © 2025 El Brasero — Checkout
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" defer></script>
+</body>
+</html>

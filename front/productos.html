@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>B-16 — Productos (Admin)</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="./css/estilos.css" />
+  <link rel="icon" href="data:,">
+</head>
+<body class="bg-light admin-productos">
+
+  <!-- NAVBAR ADMIN -->
+  <nav class="navbar bg-white border-bottom sticky-top">
+    <div class="container-fluid">
+      <span class="navbar-brand mb-0 h1">
+        <img src="./img/logo.png" width="28" height="28" class="rounded me-2" alt="">
+        El Brasero — Admin
+      </span>
+      <div class="d-flex align-items-center gap-3">
+        <a class="btn btn-outline-secondary btn-sm" href="./admin.html">Volver</a>
+      </div>
+    </div>
+  </nav>
+  
+  <!-- CONTENIDO -->
+  <main class="py-4 py-md-5">
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h4 mb-0">Productos (Admin)</h1>
+        <button id="btnNuevo" class="btn btn-primary">+ Nuevo producto</button>
+      </div>
+
+      <!-- Alertas -->
+      <div id="msgBox" class="alert d-none" role="alert"></div>
+
+      <!-- Tabla -->
+      <div class="card shadow-sm">
+        <div class="table-responsive">
+          <table class="table align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Categoría</th>
+                <th class="text-end">Precio</th>
+                <th>Disponible</th>
+                <th class="text-center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyProductos">
+              <!-- JS inyecta -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL -->
+  <div class="modal fade" id="modalProducto" tabindex="-1" aria-labelledby="modalProductoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form id="formProducto" novalidate>
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalProductoLabel">Nuevo producto</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="prodId">
+
+            <div class="mb-3">
+              <label for="prodNombre" class="form-label">Nombre</label>
+              <input type="text" id="prodNombre" class="form-control" required minlength="3">
+              <div class="invalid-feedback">Mínimo 3 caracteres.</div>
+            </div>
+
+            <div class="mb-3">
+              <label for="prodPrecio" class="form-label">Precio (CLP)</label>
+              <input type="number" id="prodPrecio" class="form-control" required min="1">
+              <div class="invalid-feedback">Debe ser mayor a 0.</div>
+            </div>
+
+            <div class="mb-3">
+              <label for="prodCat" class="form-label">Categoría</label>
+              <select id="prodCat" class="form-select" required>
+                <option value="">Seleccionar...</option>
+                <option>Pollos</option>
+                <option>Combos</option>
+                <option>Acompañamientos</option>
+                <option>Bebidas</option>
+              </select>
+              <div class="invalid-feedback">Campo obligatorio.</div>
+            </div>
+
+            <div class="mb-3">
+              <label for="prodDesc" class="form-label">Descripción breve</label>
+              <textarea id="prodDesc" class="form-control" rows="2" placeholder="Opcional"></textarea>
+            </div>
+
+            <div class="mb-3">
+              <label for="prodImg" class="form-label">URL imagen (opcional)</label>
+              <input type="url" id="prodImg" class="form-control" placeholder="https://...">
+            </div>
+
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="prodDisp" checked>
+              <label class="form-check-label" for="prodDisp">Disponible</label>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <footer class="py-4">
+    <div class="container small text-center text-muted">
+      © 2025 El Brasero — Productos (Front simulado)
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS  -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

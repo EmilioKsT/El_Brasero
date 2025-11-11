@@ -2,6 +2,8 @@ import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import dotenv from 'dotenv';
 import { connectDB } from './config/database.js';
+import authRoutes from './routes/auth.routes.js';
+
 
 // Cargar variables de entorno
 dotenv.config();
@@ -16,6 +18,7 @@ await fastify.register(cors, {
   origin: true, // En desarrollo permite todos los orígenes
   credentials: true
 });
+await fastify.register(authRoutes, { prefix: '/api/auth' });
 
 // ============================================
 // RUTAS

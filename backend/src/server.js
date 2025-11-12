@@ -1,5 +1,6 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
+import jwt from '@fastify/jwt';
 import dotenv from 'dotenv';
 import { connectDB } from './config/database.js';
 import authRoutes from './routes/auth.routes.js';
@@ -18,6 +19,13 @@ await fastify.register(cors, {
   origin: true, // En desarrollo permite todos los orígenes
   credentials: true
 });
+
+//Configurar JWT
+await fastify.register(jwt, {
+  secret: process.env.JWT_SECRET || 'brasero_jwt_secret_2024_super_seguro'
+});
+
+//Registrar rutas de autenticación
 await fastify.register(authRoutes, { prefix: '/api/auth' });
 
 // ============================================

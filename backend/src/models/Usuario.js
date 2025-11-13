@@ -87,14 +87,7 @@ UsuarioSchema.methods.compararPassword = async function(passwordPlain) {
     return await bcrypt.compare(passwordPlain, this.passwordHash);
 };
 
-//Ocultar campos sensibles al convertir a JSON
-UsuarioSchema.methods.toJSON = function() {
-    const usuario = this.toObject();
-    delete usuario.passwordHash;
-    delete usuario.__v;
-    return usuario; 
-};
-
+// Método para verificar si el perfil está completo
 UsuarioSchema.methods.perfilCompleto = function() {
   return !!(
     this.nombre &&
@@ -104,24 +97,21 @@ UsuarioSchema.methods.perfilCompleto = function() {
   );
 };
 
+// Método para actualizar perfil
 UsuarioSchema.methods.actualizarPerfil = async function(datos) {
   // Solo actualizar campos que vengan en datos
   if (datos.nombre !== undefined) this.nombre = datos.nombre;
   if (datos.telefono !== undefined) this.telefono = datos.telefono;
   if (datos.direccion !== undefined) this.direccion = datos.direccion;
   if (datos.comuna !== undefined) this.comuna = datos.comuna;
-  
+
   return await this.save();
 };
 
-UsuarioSchema.methods.compararPassword = async function(passwordIngresado) {
-  return await bcrypt.compare(passwordIngresado, this.passwordHash);
-};
-
-// ===== TRANSFORMACIÓN JSON =====
+// Ocultar campos sensibles al convertir a JSON
 UsuarioSchema.set('toJSON', {
   transform: (doc, ret) => {
-    delete ret.password;
+    delete ret.passwordHash;
     delete ret.__v;
     return ret;
   }

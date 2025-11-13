@@ -57,10 +57,19 @@ export const verifyJWT = async (request, reply) => {
 };
 
 export const verifyAdmin = async (request, reply) => {
+  // Validar que el usuario esté autenticado primero
+  if (!request.user) {
+    return reply.code(401).send({
+      error: 'No autorizado',
+      mensaje: 'Debes iniciar sesión primero'
+    });
+  }
+
+  // Validar que sea admin
   if (request.user.rol !== 'admin') {
     return reply.code(403).send({
       error: 'Acceso denegado',
-      mensaje: 'No tienes permisos'
+      mensaje: 'No tienes permisos de administrador'
     });
   }
 };

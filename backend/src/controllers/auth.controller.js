@@ -1,5 +1,7 @@
 import Usuario from '../models/Usuario.js';
 import CodigoRecuperacion from '../models/CodigoRecuperacion.js';
+import RefreshToken from '../models/RefreshToken.js'; // ← NUEVO
+import crypto from 'crypto'; // ← NUEVO
 
 // ============================================
 // FUNCIONES AUXILIARES
@@ -92,7 +94,7 @@ export const registrarUsuario = async (request, reply) => {
 };
 
 // ============================================
-// ENDPOINT: INICIAR SESIÓN (B-04)
+// ENDPOINT: INICIAR SESIÓN (B-04) - CON ZTA
 // ============================================
 
 // POST /api/auth/login
@@ -135,37 +137,172 @@ export const iniciarSesion = async (request, reply) => {
         }
 
         console.log('Usuario autenticado:', usuario.email);
-        console.log('request.server.jwt existe?', !!request.server.jwt);
 
-        // Generar token JWT
-        const token = request.server.jwt.sign({
+        // ===== ZTA: GENERAR TOKENS ===== ← NUEVO
+        
+        // 1. Access Token (corto, 15 minutos)
+        const accessToken = request.server.jwt.sign({
             sub: usuario._id.toString(),
             rol: usuario.rol
         }, {
-            expiresIn: '24h'
+            expiresIn: '15m'  // ← CAMBIO: era 24h, ahora 15m
         });
 
-        console.log('Token generado:', token ? 'SÍ' : 'NO');
-        console.log('Token:', token);
+        // 2. Refresh Token (largo, 7 días) - almacenado en BD ← NUEVO
+        const refreshTokenValue = crypto.randomBytes(64).toString('hex');
+        
+        const refreshToken = new RefreshToken({
+            tokenValue: refreshTokenValue,
+            usuarioId: usuario._id,
+            userAgent: request.headers['user-agent'],
+            ipAddress: request.ip,
+            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 días
+        });
+        
+        await refreshToken.save();
+        
+        console.log('   Access Token: 15m');
+        console.log('   Refresh Token: 7d (ID:', refreshToken._id, ')');
 
         // Ver si el perfil está completo (adelanto para B-06)
-        const profileComplete = false;
+        const profileComplete = usuario.perfilCompleto ? usuario.perfilCompleto() : false;
 
-        const respuesta = {
+        // Responder con AMBOS tokens ← CAMBIO
+        return reply.code(200).send({
             exito: true,
-            accessToken: token,
+            accessToken,
+            refreshToken: refreshTokenValue,  // ← NUEVO
             rol: usuario.rol,
             profileComplete
-        };
-        
-        console.log('Enviando respuesta:', JSON.stringify(respuesta));
-
-        // Responder con el token
-        return reply.code(200).send(respuesta);
+        });
 
     } catch (error) {
         console.error('Error al iniciar sesión:', error);
-        console.error('Stack:', error.stack);
+        return reply.code(500).send({
+            exito: false,
+            mensaje: 'Error interno del servidor'
+        });
+    }
+};
+
+// ============================================
+// ENDPOINT: RENOVAR ACCESS TOKEN (B-04) - NUEVO
+// ============================================
+
+// POST /api/auth/refresh
+export const renovarToken = async (request, reply) => {
+    try {
+        const { refreshToken } = request.body;
+
+        if (!refreshToken) {
+            return reply.code(400).send({
+                exito: false,
+                mensaje: 'El refresh token es obligatorio'
+            });
+        }
+
+        console.log('Intentando renovar token...');
+
+        // ZTA: Verificar que el refresh token sea válido
+        const tokenValido = await RefreshToken.isValid(refreshToken);
+
+        if (!tokenValido) {
+            console.log('Refresh token inválido o revocado');
+            return reply.code(401).send({
+                exito: false,
+                mensaje: 'Tu sesión ha expirado. Por favor inicia sesión nuevamente.'
+            });
+        }
+
+        // Generar nuevo access token
+        const nuevoAccessToken = request.server.jwt.sign({
+            sub: tokenValido.usuarioId._id.toString(),
+            rol: tokenValido.usuarioId.rol
+        }, {
+            expiresIn: '15m'
+        });
+
+        console.log('Token renovado para usuario:', tokenValido.usuarioId._id);
+
+        return reply.code(200).send({
+            exito: true,
+            accessToken: nuevoAccessToken
+        });
+
+    } catch (error) {
+        console.error('Error al renovar token:', error);
+        return reply.code(500).send({
+            exito: false,
+            mensaje: 'Error interno del servidor'
+        });
+    }
+};
+
+// ============================================
+// ENDPOINT: LOGOUT (B-04) - NUEVO
+// ============================================
+
+// POST /api/auth/logout
+export const logout = async (request, reply) => {
+    try {
+        const { refreshToken } = request.body;
+
+        if (!refreshToken) {
+            return reply.code(400).send({
+                exito: false,
+                mensaje: 'El refresh token es obligatorio'
+            });
+        }
+
+        console.log('🚪 Intentando logout...');
+
+        // Buscar y revocar el token
+        const token = await RefreshToken.findOne({ tokenValue: refreshToken });
+
+        if (token) {
+            await token.revoke();
+            console.log('Logout exitoso - Token revocado');
+        }
+
+        return reply.code(200).send({
+            exito: true,
+            mensaje: 'Sesión cerrada exitosamente'
+        });
+
+    } catch (error) {
+        console.error('Error en logout:', error);
+        return reply.code(500).send({
+            exito: false,
+            mensaje: 'Error interno del servidor'
+        });
+    }
+};
+
+// ============================================
+// ENDPOINT: LOGOUT ALL (B-04) - NUEVO
+// ============================================
+
+// POST /api/auth/logout-all
+export const logoutAll = async (request, reply) => {
+    try {
+        // request.user viene del middleware verifyJWT
+        const usuarioId = request.user.sub;
+
+        console.log('Cerrando todas las sesiones del usuario:', usuarioId);
+
+        // ZTA: Revocar TODOS los tokens del usuario
+        const tokensRevocados = await RefreshToken.revokeAllByUser(usuarioId);
+
+        console.log(`${tokensRevocados} sesiones cerradas`);
+
+        return reply.code(200).send({
+            exito: true,
+            mensaje: 'Todas las sesiones han sido cerradas',
+            sesionesRevocadas: tokensRevocados
+        });
+
+    } catch (error) {
+        console.error('Error en logout all:', error);
         return reply.code(500).send({
             exito: false,
             mensaje: 'Error interno del servidor'
@@ -276,7 +413,7 @@ export const validarCodigoRecuperacion = async (request, reply) => {
 };
 
 // ============================================
-// ENDPOINT: RESETEAR CONTRASEÑA (B-05)
+// ENDPOINT: RESETEAR CONTRASEÑA (B-05) - CON ZTA
 // ============================================
 
 // POST /api/auth/recovery/reset
@@ -310,13 +447,21 @@ export const resetearPassword = async (request, reply) => {
         }
 
         // Delegar al modelo
-        const exito = await CodigoRecuperacion.resetearPasswordConCodigo(
+        const resultado = await CodigoRecuperacion.resetearPasswordConCodigo(
             email,
             codigo,
             nuevaPassword
         );
         
-        if (exito) {
+        if (resultado) {
+            // ===== ZTA: REVOCAR TODAS LAS SESIONES ===== ← NUEVO
+            // Por seguridad, al cambiar password se cierran todas las sesiones
+            const usuario = await Usuario.findOne({ email });
+            if (usuario) {
+                await RefreshToken.revokeAllByUser(usuario._id);
+                console.log('🔒 Todas las sesiones revocadas por cambio de password');
+            }
+
             return reply.code(200).send({
                 exito: true,
                 mensaje: 'Contraseña actualizada correctamente'

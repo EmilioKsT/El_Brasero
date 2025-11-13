@@ -1,10 +1,14 @@
 import {
   registrarUsuario,
   iniciarSesion,
-  solicitarRecuperacion,      // NUEVO
-  validarCodigoRecuperacion,  // NUEVO
-  resetearPassword            // NUEVO
+  renovarToken,              // ← NUEVO
+  logout,                    // ← NUEVO
+  logoutAll,                 // ← NUEVO
+  solicitarRecuperacion,
+  validarCodigoRecuperacion,
+  resetearPassword
 } from '../controllers/auth.controller.js';
+import { verifyJWT } from '../middlewares/auth.middleware.js'; // ← NUEVO
 
 export default async function authRoutes(fastify, options) {
   
@@ -59,10 +63,10 @@ export default async function authRoutes(fastify, options) {
     }
   }, registrarUsuario);
 
-  // POST /api/auth/login - Iniciar sesión
+  // POST /api/auth/login - Iniciar sesión (AHORA CON REFRESH TOKEN)
   fastify.post('/login', {
     schema: {
-      description: 'Iniciar sesión y obtener JWT',
+      description: 'Iniciar sesión y obtener JWT (ZTA: access + refresh token)',
       tags: ['auth'],
       body: {
         type: 'object',
@@ -85,6 +89,7 @@ export default async function authRoutes(fastify, options) {
           properties: {
             exito: { type: 'boolean' },
             accessToken: { type: 'string' },
+            refreshToken: { type: 'string' },  // ← NUEVO
             rol: { type: 'string' },
             profileComplete: { type: 'boolean' }
           }
@@ -115,7 +120,111 @@ export default async function authRoutes(fastify, options) {
   }, iniciarSesion);
 
   // ============================================
-  // RUTAS NUEVAS - RECUPERACIÓN DE CONTRASEÑA (B-05)
+  // RUTAS NUEVAS - ZTA (B-04)
+  // ============================================
+
+  /**
+   * POST /api/auth/refresh
+   * Renovar access token usando refresh token
+   * Cliente debe enviar el refreshToken en el body
+   */
+  fastify.post('/refresh', {
+    schema: {
+      description: 'Renovar access token con refresh token',
+      tags: ['auth'],
+      body: {
+        type: 'object',
+        required: ['refreshToken'],
+        properties: {
+          refreshToken: { 
+            type: 'string',
+            description: 'Refresh token recibido en el login'
+          }
+        }
+      },
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            exito: { type: 'boolean' },
+            accessToken: { type: 'string' }
+          }
+        },
+        400: {
+          type: 'object',
+          properties: {
+            exito: { type: 'boolean' },
+            mensaje: { type: 'string' }
+          }
+        },
+        401: {
+          type: 'object',
+          properties: {
+            exito: { type: 'boolean' },
+            mensaje: { type: 'string' }
+          }
+        }
+      }
+    }
+  }, renovarToken);
+
+  /**
+   * POST /api/auth/logout
+   * Cerrar sesión (revocar refresh token)
+   * Cierra la sesión del dispositivo actual
+   */
+  fastify.post('/logout', {
+    schema: {
+      description: 'Cerrar sesión (revocar refresh token)',
+      tags: ['auth'],
+      body: {
+        type: 'object',
+        required: ['refreshToken'],
+        properties: {
+          refreshToken: { 
+            type: 'string',
+            description: 'Refresh token a revocar'
+          }
+        }
+      },
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            exito: { type: 'boolean' },
+            mensaje: { type: 'string' }
+          }
+        }
+      }
+    }
+  }, logout);
+
+  /**
+   * POST /api/auth/logout-all
+   * Cerrar TODAS las sesiones del usuario (protegido)
+   * Requiere estar autenticado con JWT
+   */
+  fastify.post('/logout-all', {
+    preHandler: [verifyJWT],  // ← Requiere JWT válido
+    schema: {
+      description: 'Cerrar todas las sesiones del usuario',
+      tags: ['auth'],
+      security: [{ bearerAuth: [] }],
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            exito: { type: 'boolean' },
+            mensaje: { type: 'string' },
+            sesionesRevocadas: { type: 'number' }
+          }
+        }
+      }
+    }
+  }, logoutAll);
+
+  // ============================================
+  // RUTAS RECUPERACIÓN DE CONTRASEÑA (B-05)
   // ============================================
 
   /**
@@ -211,11 +320,11 @@ export default async function authRoutes(fastify, options) {
   /**
    * POST /api/auth/recovery/reset
    * Resetear contraseña usando código de recuperación
-   * Valida el código y actualiza la contraseña
+   * ZTA: Al cambiar password se revocan TODAS las sesiones
    */
   fastify.post('/recovery/reset', {
     schema: {
-      description: 'Resetear contraseña usando código de recuperación',
+      description: 'Resetear contraseña (ZTA: revoca todas las sesiones)',
       tags: ['auth'],
       body: {
         type: 'object',

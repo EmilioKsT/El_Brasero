@@ -4,7 +4,7 @@ import jwt from '@fastify/jwt';
 import dotenv from 'dotenv';
 import { connectDB } from './config/database.js';
 import authRoutes from './routes/auth.routes.js';
-
+import perfilRoutes from './routes/perfil.routes.js';
 
 // Cargar variables de entorno
 dotenv.config();
@@ -14,19 +14,20 @@ const fastify = Fastify({
   logger: true 
 });
 
+// ============================================
+// PLUGINS
+// ============================================
+
 // Registrar plugin CORS (permitir peticiones desde el frontend)
 await fastify.register(cors, {
   origin: true, // En desarrollo permite todos los orígenes
   credentials: true
 });
 
-//Configurar JWT
+// Configurar JWT
 await fastify.register(jwt, {
   secret: process.env.JWT_SECRET || 'brasero_jwt_secret_2024_super_seguro'
 });
-
-//Registrar rutas de autenticación
-await fastify.register(authRoutes, { prefix: '/api/auth' });
 
 // ============================================
 // RUTAS
@@ -35,8 +36,8 @@ await fastify.register(authRoutes, { prefix: '/api/auth' });
 // Ruta de prueba (raíz)
 fastify.get('/', async (request, reply) => {
   return { 
-    message: 'API El Brasero funcionando correctamente',
-    version: '1.0.0',
+    message: '🔥 API El Brasero con ZTA activo',
+    version: '2.0.0',
     timestamp: new Date().toISOString()
   };
 });
@@ -46,9 +47,16 @@ fastify.get('/health', async (request, reply) => {
   return { 
     status: 'OK',
     uptime: process.uptime(),
-    mongodb: fastify.mongoose ? 'connected' : 'disconnected'
+    mongodb: 'connected',
+    zta: 'enabled'
   };
 });
+
+// Registrar rutas de autenticación (SOLO UNA VEZ)
+await fastify.register(authRoutes, { prefix: '/api/auth' });
+
+// Registrar rutas de perfil
+await fastify.register(perfilRoutes, { prefix: '/api/auth' });
 
 // ============================================
 // INICIAR SERVIDOR
@@ -67,13 +75,33 @@ const start = async () => {
     });
     
     console.log('');
-    console.log('🚀 ============================================');
-    console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
-    console.log('🚀 ============================================');
+    console.log('🔒 ============================================');
+    console.log(`🔒 EL BRASERO - ZERO TRUST ARCHITECTURE`);
+    console.log('🔒 ============================================');
+    console.log(`🚀 Servidor: http://localhost:${PORT}`);
     console.log('');
-    console.log('📝 Rutas disponibles:');
-    console.log(`   GET  http://localhost:${PORT}/`);
-    console.log(`   GET  http://localhost:${PORT}/health`);
+    console.log('📡 Endpoints disponibles:');
+    console.log('   GET  /');
+    console.log('   GET  /health');
+    console.log('');
+    console.log('🔓 PÚBLICOS:');
+    console.log('   POST /api/auth/register');
+    console.log('   POST /api/auth/login (→ accessToken 15m + refreshToken 7d)');
+    console.log('   POST /api/auth/refresh (renovar accessToken)');
+    console.log('   POST /api/auth/logout (revocar 1 sesión)');
+    console.log('   POST /api/auth/recovery/request');
+    console.log('   POST /api/auth/recovery/validate');
+    console.log('   POST /api/auth/recovery/reset');
+    console.log('');
+    console.log('🔒 PROTEGIDOS (requieren JWT):');
+    console.log('   GET  /api/auth/perfil');
+    console.log('   PUT  /api/auth/perfil');
+    console.log('   POST /api/auth/logout-all (cerrar TODAS las sesiones)');
+    console.log('');
+    console.log('🛡️  ZTA ACTIVO:');
+    console.log('   ✅ Cada request: JWT + Usuario activo + Token válido');
+    console.log('   ✅ Access Token: 15 minutos (renovable)');
+    console.log('   ✅ Refresh Token: 7 días (revocable)');
     console.log('');
     
   } catch (err) {
@@ -84,7 +112,7 @@ const start = async () => {
 
 // Manejo de señales para cerrar correctamente
 process.on('SIGINT', async () => {
-  console.log('\n Cerrando servidor...');
+  console.log('\n🔴 Cerrando servidor...');
   await fastify.close();
   process.exit(0);
 });

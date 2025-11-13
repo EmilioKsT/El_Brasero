@@ -472,3 +472,27 @@ export const resetearPassword = async (request, reply) => {
         });
     }
 };
+
+/**
+ * GET /api/auth/status
+ * Verifica el token JWT y devuelve los datos del usuario
+ * Usado por el frontend para saber si hay sesión activa
+ */
+
+export const obtenerStatus = async (request, reply) => {
+    const usuario = request.usuario; // Viene del middleware verifyJWT
+
+    console.log(`Status OK para usuario: ${usuario.email}`);
+        
+    return reply.code(200).send({
+        autenticado: true,
+        usuario: {
+            _id: usuario._id,
+            email: usuario.email,
+            rol: usuario.rol,
+            nombre: usuario.nombre,
+            // Usamos el método que ya tenías en el modelo Usuario
+            profileComplete: usuario.perfilCompleto() 
+        }
+    });
+};

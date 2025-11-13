@@ -6,7 +6,8 @@ import {
   logoutAll,                 // ← NUEVO
   solicitarRecuperacion,
   validarCodigoRecuperacion,
-  resetearPassword
+  resetearPassword,
+  obtenerStatus
 } from '../controllers/auth.controller.js';
 import { verifyJWT } from '../middlewares/auth.middleware.js'; // ← NUEVO
 
@@ -365,5 +366,40 @@ export default async function authRoutes(fastify, options) {
       }
     }
   }, resetearPassword);
+
+  /**
+   * GET /api/auth/status
+   * Verifica el token y devuelve datos del usuario (para Navbar)
+   */
+  fastify.get('/status', {
+    preHandler: [verifyJWT], // <-- PROTEGIDO
+    schema: {
+      description: 'Verificar token y obtener estado de sesión (B-07)',
+      tags: ['auth'],
+      security: [{ bearerAuth: [] }],
+      response: {
+        200: {
+          description: 'Token válido, usuario autenticado',
+          type: 'object',
+          properties: {
+            autenticado: { type: 'boolean' },
+            usuario: {
+              type: 'object',
+              properties: {
+                _id: { type: 'string' },
+                email: { type: 'string' },
+                rol: { type: 'string' },
+                nombre: { type: 'string' },
+                profileComplete: { type: 'boolean' }
+              }
+            }
+          }
+        },
+        401: {
+          description: 'Token inválido o expirado'
+        }
+      }
+    }
+  }, obtenerStatus);
 
 }

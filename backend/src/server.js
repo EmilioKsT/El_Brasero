@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import { connectDB } from './config/database.js';
 import authRoutes from './routes/auth.routes.js';
 import perfilRoutes from './routes/perfil.routes.js';
+import productoRoutes from './routes/producto.routes.js'; 
 
 // Cargar variables de entorno
 dotenv.config();
@@ -36,7 +37,7 @@ await fastify.register(jwt, {
 // Ruta de prueba (raíz)
 fastify.get('/', async (request, reply) => {
   return { 
-    message: '🔥 API El Brasero con ZTA activo',
+    message: 'API El Brasero, el mejor pollo a las brasas',
     version: '2.0.0',
     timestamp: new Date().toISOString()
   };
@@ -47,8 +48,7 @@ fastify.get('/health', async (request, reply) => {
   return { 
     status: 'OK',
     uptime: process.uptime(),
-    mongodb: 'connected',
-    zta: 'enabled'
+    mongodb: 'connected'
   };
 });
 
@@ -57,6 +57,9 @@ await fastify.register(authRoutes, { prefix: '/api/auth' });
 
 // Registrar rutas de perfil
 await fastify.register(perfilRoutes, { prefix: '/api/auth' });
+
+// Registrar rutas de productos
+await fastify.register(productoRoutes, { prefix: '/api/productos' });
 
 // ============================================
 // INICIAR SERVIDOR

@@ -1,23 +1,8 @@
 import Usuario from '../models/Usuario.js';
 import CodigoRecuperacion from '../models/CodigoRecuperacion.js';
-import RefreshToken from '../models/RefreshToken.js'; // ← NUEVO
-import crypto from 'crypto'; // ← NUEVO
-
-// ============================================
-// FUNCIONES AUXILIARES
-// ============================================
-
-// Validar política de contraseñas
-function validarPassword(password) {
-    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
-    return regex.test(password);
-}
-
-// Validar formato email
-function validarEmail(email) {
-    const regex = /^\S+@\S+\.\S+$/;
-    return regex.test(email);
-}
+import RefreshToken from '../models/RefreshToken.js';
+import crypto from 'crypto';
+import { validarEmail, validarPassword, validarCodigoRecuperacion as validarFormatoCodigo } from '../helpers/validators.js';
 
 // ============================================
 // ENDPOINT: REGISTRAR USUARIO (B-03)
@@ -38,9 +23,9 @@ export const registrarUsuario = async (request, reply) => {
 
         // Validar formato email
         if (!validarEmail(email)) {
-            return reply.code(400).send({ 
+            return reply.code(400).send({
                 exito: false,
-                mensaje: 'Formato de email inválido o no está activo'
+                mensaje: 'Formato de email inválido'
             });
         }
 
@@ -328,8 +313,7 @@ export const solicitarRecuperacion = async (request, reply) => {
         }
 
         // Validar formato email
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
+        if (!validarEmail(email)) {
             return reply.code(400).send({
                 exito: false,
                 mensaje: 'Ingresa un email válido'
@@ -372,8 +356,7 @@ export const validarCodigoRecuperacion = async (request, reply) => {
         }
 
         // Validar formato email
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
+        if (!validarEmail(email)) {
             return reply.code(400).send({
                 exito: false,
                 mensaje: 'Ingresa un email válido'
@@ -381,7 +364,7 @@ export const validarCodigoRecuperacion = async (request, reply) => {
         }
 
         // Validar formato código (6 dígitos)
-        if (!/^\d{6}$/.test(codigo)) {
+        if (!validarFormatoCodigo(codigo)) {
             return reply.code(400).send({
                 exito: false,
                 mensaje: 'El código debe ser de 6 dígitos'
@@ -430,8 +413,7 @@ export const resetearPassword = async (request, reply) => {
         }
 
         // Validar formato email
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
+        if (!validarEmail(email)) {
             return reply.code(400).send({
                 exito: false,
                 mensaje: 'Ingresa un email válido'
@@ -439,7 +421,7 @@ export const resetearPassword = async (request, reply) => {
         }
 
         // Validar formato código (6 dígitos)
-        if (!/^\d{6}$/.test(codigo)) {
+        if (!validarFormatoCodigo(codigo)) {
             return reply.code(400).send({
                 exito: false,
                 mensaje: 'El código debe ser de 6 dígitos'

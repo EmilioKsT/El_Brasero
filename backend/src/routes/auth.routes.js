@@ -396,7 +396,12 @@ export default async function authRoutes(fastify, options) {
           }
         },
         401: {
-          description: 'Token inválido o expirado'
+          description: 'Token inválido o expirado',
+          type: 'object', // <-- Faltaba esto
+          properties: {  // <-- Y esto
+            error: { type: 'string' },
+            mensaje: { type: 'string' }
+          }
         }
       }
     }

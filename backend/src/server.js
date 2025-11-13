@@ -6,6 +6,7 @@ import { connectDB } from './config/database.js';
 import authRoutes from './routes/auth.routes.js';
 import perfilRoutes from './routes/perfil.routes.js';
 import productoRoutes from './routes/producto.routes.js'; 
+import carritoRoutes from './routes/carrito.routes.js';
 
 // Cargar variables de entorno
 dotenv.config();
@@ -60,6 +61,9 @@ await fastify.register(perfilRoutes, { prefix: '/api/auth' });
 
 // Registrar rutas de productos
 await fastify.register(productoRoutes, { prefix: '/api/productos' });
+
+// Registrar rutas de carrito
+await fastify.register(carritoRoutes, { prefix: '/api/carrito' });
 
 // ============================================
 // INICIAR SERVIDOR

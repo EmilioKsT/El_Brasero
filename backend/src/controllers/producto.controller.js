@@ -40,16 +40,52 @@ export const crearProducto = async (request, reply) => {
 };
 
 /**
- * [PÚBLICO] GET /api/productos
- * Obtener todos los productos (para el catálogo)
+ * [PÚBLICO] GET /api/productos (MODIFICADO PARA B-09)
+ * Obtener todos los productos (con filtros)
  */
 export const obtenerProductos = async (request, reply) => {
   try {
-    // Por ahora, listamos todos.
-    // En el futuro, aquí iría la lógica de filtrado y paginación.
-    const productos = await Producto.find()
-                            .sort({ categoria: 1, nombre: 1 });
-                            
+    // 1. Extraer los query parameters
+    const { q, categoria, min, max } = request.query;
+
+    // 2. Construir el objeto de consulta (filtro)
+    const query = {};
+
+    // Filtro de búsqueda por texto (q)
+    // Coincide con el "Escenario 1: Búsqueda por texto"
+    if (q) {
+      // 'i' significa case-insensitive (ignora mayúsculas/minúsculas)
+      query.nombre = new RegExp(q, 'i'); 
+    }
+
+    // Filtro por categoría (Escenario 2)
+    // Nota: El DoR dice ?categoria=Bebidas
+    if (categoria) {
+      query.categoria = categoria;
+    }
+
+    // Filtro por rango de precio (Escenario 3)
+    if (min || max) {
+      query.precio = {};
+      // $gte = greater than or equal (mayor o igual)
+      if (min) {
+        query.precio.$gte = parseInt(min, 10);
+      }
+      // $lte = less than or equal (menor o igual)
+      if (max) {
+        query.precio.$lte = parseInt(max, 10);
+      }
+      // Esto cubre el precio "entre 8.000 y 15.000 (inclusive)"
+    }
+
+    console.log('Filtrando productos con:', query);
+
+    // 3. Ejecutar la consulta con los filtros
+    const productos = await Producto.find(query)
+                                    .sort({ categoria: 1, nombre: 1 });
+    
+    // Si productos es un array vacío, el frontend se encargará
+    // de mostrar "No se encontraron productos"
     return reply.code(200).send(productos);
     
   } catch (error) {
@@ -82,7 +118,6 @@ export const obtenerProductoPorId = async (request, reply) => {
     
   } catch (error) {
     console.error('Error al obtener producto por ID:', error);
-    // Error común si el ID tiene formato inválido
     if (error.name === 'CastError') {
       return reply.code(404).send({
         error: 'ID inválido',

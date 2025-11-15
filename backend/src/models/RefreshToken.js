@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { config } from '../config/env.js';
 
 const RefreshTokenSchema = new mongoose.Schema({
   tokenValue: {
@@ -64,6 +65,39 @@ RefreshTokenSchema.statics.revokeAllByUser = async function(usuarioId) {
 RefreshTokenSchema.methods.revoke = async function() {
   this.isRevoked = true;
   await this.save();
+};
+
+/**
+ * Crea un nuevo token con límite de sesiones activas
+ * Si el usuario excede el límite, revoca la sesión más antigua
+ */
+RefreshTokenSchema.statics.createWithLimit = async function(tokenData) {
+  const { usuarioId } = tokenData;
+  const maxSesiones = config.sessions.maxActivePerUser;
+
+  // Contar sesiones activas
+  const sesionesActivas = await this.countDocuments({
+    usuarioId,
+    isRevoked: false,
+    expiresAt: { $gt: new Date() }
+  });
+
+  // Si excede el límite, revocar la más antigua
+  if (sesionesActivas >= maxSesiones) {
+    const tokenMasAntiguo = await this.findOne({
+      usuarioId,
+      isRevoked: false,
+      expiresAt: { $gt: new Date() }
+    }).sort({ createdAt: 1 }); // Ordenar por fecha de creación ascendente
+
+    if (tokenMasAntiguo) {
+      await tokenMasAntiguo.revoke();
+      console.log(`⚠️  Sesión más antigua revocada (límite: ${maxSesiones})`);
+    }
+  }
+
+  // Crear el nuevo token
+  return this.create(tokenData);
 };
 
 const RefreshToken = mongoose.model('RefreshToken', RefreshTokenSchema);

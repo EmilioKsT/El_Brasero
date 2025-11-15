@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import crypto from "crypto";
 
 const codigoRecuperacionSchema = new mongoose.Schema({
     codigo: {
@@ -47,7 +48,11 @@ codigoRecuperacionSchema.methods.isValid = function() {
 };
 
 codigoRecuperacionSchema.statics.generarCodigo = function() {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  // Usar crypto para generación criptográficamente segura
+  const bytes = crypto.randomBytes(3); // 3 bytes = 24 bits
+  const numeroAleatorio = parseInt(bytes.toString('hex'), 16);
+  const codigo = numeroAleatorio % 1000000; // Obtener número entre 0-999999
+  return codigo.toString().padStart(6, '0'); // Asegurar 6 dígitos con padding
 };
 
 codigoRecuperacionSchema.statics.calcularExpiracion = function() {

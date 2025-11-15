@@ -1,37 +1,60 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import jwt from '@fastify/jwt';
-import dotenv from 'dotenv';
+import helmet from '@fastify/helmet';
+import rateLimit from '@fastify/rate-limit';
+import { config } from './config/env.js';
 import { connectDB } from './config/database.js';
 import authRoutes from './routes/auth.routes.js';
 import perfilRoutes from './routes/perfil.routes.js';
-import productoRoutes from './routes/producto.routes.js'; 
+import productoRoutes from './routes/producto.routes.js';
 import carritoRoutes from './routes/carrito.routes.js';
 import pedidoRoutes from './routes/pedido.routes.js';
 import pagoRoutes from './routes/pago.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 
-// Cargar variables de entorno
-dotenv.config();
+// Validar JWT_SECRET antes de continuar
+if (!config.jwt.secret) {
+  throw new Error('❌ JWT_SECRET no puede estar vacío. Configura tu archivo .env');
+}
 
-// Crear instancia de Fastify con logger
-const fastify = Fastify({ 
-  logger: true 
+// Crear instancia de Fastify con logger Pino
+const fastify = Fastify({
+  logger: {
+    level: config.server.nodeEnv === 'development' ? 'info' : 'warn',
+    transport: config.server.nodeEnv === 'development' ? {
+      target: 'pino-pretty',
+      options: {
+        translateTime: 'HH:MM:ss Z',
+        ignore: 'pid,hostname'
+      }
+    } : undefined
+  }
 });
 
 // ============================================
-// PLUGINS
+// PLUGINS DE SEGURIDAD
 // ============================================
 
-// Registrar plugin CORS (permitir peticiones desde el frontend)
-await fastify.register(cors, {
-  origin: true, // En desarrollo permite todos los orígenes
-  credentials: true
+// 1. Helmet - Headers de seguridad HTTP
+await fastify.register(helmet, {
+  contentSecurityPolicy: config.server.nodeEnv === 'production' ? undefined : false,
+  global: true
 });
 
-// Configurar JWT
+// 2. CORS - Control de orígenes permitidos
+await fastify.register(cors, config.cors);
+
+// 3. Rate Limiting - Protección contra fuerza bruta
+await fastify.register(rateLimit, {
+  global: false, // Aplicaremos selectivamente
+  max: config.rateLimit.global.max,
+  timeWindow: config.rateLimit.global.timeWindow
+});
+
+// 4. JWT - Autenticación con tokens
 await fastify.register(jwt, {
-  secret: process.env.JWT_SECRET || 'brasero_jwt_secret_2024_super_seguro'
+  secret: config.jwt.secret
 });
 
 // ============================================
@@ -85,21 +108,25 @@ const start = async () => {
   try {
     // 1. Conectar a MongoDB
     await connectDB();
-    
+
     // 2. Levantar servidor
-    const PORT = process.env.PORT || 3000;
-    await fastify.listen({ 
-      port: PORT,
-      host: '0.0.0.0' // Escuchar en todas las interfaces
+    await fastify.listen({
+      port: config.server.port,
+      host: config.server.host
     });
-    
+
     console.log('');
     console.log('🔒 ============================================');
-    console.log(`🔒 EL BRASERO `);
+    console.log('🔒 EL BRASERO - API REST');
     console.log('🔒 ============================================');
-    console.log(`🚀 Servidor: http://localhost:${PORT}`);
- 
-    
+    console.log(`🚀 Servidor: http://localhost:${config.server.port}`);
+    console.log(`🌍 Entorno: ${config.server.nodeEnv}`);
+    console.log(`🔐 CORS: ${config.server.nodeEnv === 'production' ? 'Restringido' : 'Desarrollo (abierto)'}`);
+    console.log(`🛡️  Helmet: Activado`);
+    console.log(`⏱️  Rate Limit: ${config.rateLimit.global.max} req/${config.rateLimit.global.timeWindow}`);
+    console.log('🔒 ============================================');
+    console.log('');
+
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);

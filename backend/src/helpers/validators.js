@@ -1,10 +1,11 @@
+import validator from 'validator';
+
 // ============================================
 // HELPERS DE VALIDACIÓN
 // ============================================
 
 /**
- * Valida formato de email
- * Regex estándar que acepta la mayoría de emails válidos
+ * Valida formato de email (mejorado con validación estricta)
  * @param {string} email - Email a validar
  * @returns {boolean} - True si es válido, false si no
  */
@@ -13,9 +14,9 @@ export function validarEmail(email) {
         return false;
     }
 
-    // Regex estándar para emails
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(email.trim());
+    // Regex mejorado para emails
+    const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return regex.test(email.trim()) && validator.isEmail(email.trim());
 }
 
 /**
@@ -59,4 +60,32 @@ export function validarCodigoRecuperacion(codigo) {
         return false;
     }
     return /^\d{6}$/.test(codigo.trim());
+}
+
+/**
+ * Sanitiza un string para prevenir XSS
+ * @param {string} input - String a sanitizar
+ * @returns {string} - String sanitizado
+ */
+export function sanitizarString(input) {
+    if (!input || typeof input !== 'string') {
+        return '';
+    }
+    return validator.escape(input.trim());
+}
+
+/**
+ * Sanitiza múltiples campos de un objeto
+ * @param {Object} obj - Objeto con campos a sanitizar
+ * @param {Array<string>} campos - Array de nombres de campos a sanitizar
+ * @returns {Object} - Objeto con campos sanitizados
+ */
+export function sanitizarCampos(obj, campos) {
+    const sanitizado = { ...obj };
+    for (const campo of campos) {
+        if (sanitizado[campo] && typeof sanitizado[campo] === 'string') {
+            sanitizado[campo] = sanitizarString(sanitizado[campo]);
+        }
+    }
+    return sanitizado;
 }

@@ -135,16 +135,15 @@ export const iniciarSesion = async (request, reply) => {
 
         // 2. Refresh Token (largo, 7 días) - almacenado en BD ← NUEVO
         const refreshTokenValue = crypto.randomBytes(64).toString('hex');
-        
-        const refreshToken = new RefreshToken({
+
+        // Crear token con límite de sesiones activas
+        const refreshToken = await RefreshToken.createWithLimit({
             tokenValue: refreshTokenValue,
             usuarioId: usuario._id,
             userAgent: request.headers['user-agent'],
             ipAddress: request.ip,
             expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 días
         });
-        
-        await refreshToken.save();
         
         console.log('   Access Token: 15m');
         console.log('   Refresh Token: 7d (ID:', refreshToken._id, ')');

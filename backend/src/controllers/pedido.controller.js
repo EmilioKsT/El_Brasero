@@ -33,7 +33,15 @@ export const confirmarPedido = async (request, reply) => {
     const itemsSnapshot = [];
 
     for (const item of carrito.items) {
-      if (!item.producto) continue; 
+      if (!item.producto) continue;
+
+      // Validar disponibilidad del producto antes de confirmar
+      const productoActual = await Producto.findById(item.producto._id);
+      if (!productoActual || !productoActual.disponible) {
+        return reply.code(400).send({
+          mensaje: `El producto "${item.producto.nombre}" ya no está disponible`
+        });
+      } 
 
       const subtotal = item.producto.precio * item.cantidad;
       totalCalculado += subtotal;
@@ -41,7 +49,7 @@ export const confirmarPedido = async (request, reply) => {
       itemsSnapshot.push({
         producto: item.producto._id,
         nombre: item.producto.nombre,
-        precioUnitARIO: item.producto.precio,
+        precioUnitario: item.producto.precio,
         cantidad: item.cantidad,
         subtotal: subtotal
       });

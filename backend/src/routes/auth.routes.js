@@ -10,6 +10,7 @@ import {
   obtenerStatus
 } from '../controllers/auth.controller.js';
 import { verifyJWT } from '../middlewares/auth.middleware.js'; // ← NUEVO
+import { config } from '../config/env.js';
 
 export default async function authRoutes(fastify, options) {
   
@@ -19,6 +20,12 @@ export default async function authRoutes(fastify, options) {
   
   // POST /api/auth/register - Registrar usuario
   fastify.post('/register', {
+    config: {
+      rateLimit: {
+        max: config.rateLimit.auth.max,
+        timeWindow: config.rateLimit.auth.timeWindow
+      }
+    },
     schema: {
       description: 'Registrar un nuevo usuario',
       tags: ['auth'],
@@ -66,6 +73,12 @@ export default async function authRoutes(fastify, options) {
 
   // POST /api/auth/login - Iniciar sesión (AHORA CON REFRESH TOKEN)
   fastify.post('/login', {
+    config: {
+      rateLimit: {
+        max: config.rateLimit.auth.max,
+        timeWindow: config.rateLimit.auth.timeWindow
+      }
+    },
     schema: {
       description: 'Iniciar sesión y obtener JWT (ZTA: access + refresh token)',
       tags: ['auth'],
@@ -234,6 +247,12 @@ export default async function authRoutes(fastify, options) {
    * SIEMPRE responde 200 OK (respuesta genérica por seguridad)
    */
   fastify.post('/recovery/request', {
+    config: {
+      rateLimit: {
+        max: config.rateLimit.recovery.max,
+        timeWindow: config.rateLimit.recovery.timeWindow
+      }
+    },
     schema: {
       description: 'Solicitar código de recuperación de contraseña',
       tags: ['auth'],
@@ -273,6 +292,12 @@ export default async function authRoutes(fastify, options) {
    * Verifica que el código sea válido (no usado, no expirado)
    */
   fastify.post('/recovery/validate', {
+    config: {
+      rateLimit: {
+        max: config.rateLimit.recovery.max,
+        timeWindow: config.rateLimit.recovery.timeWindow
+      }
+    },
     schema: {
       description: 'Validar código de recuperación',
       tags: ['auth'],

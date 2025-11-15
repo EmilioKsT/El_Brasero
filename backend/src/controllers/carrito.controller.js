@@ -118,6 +118,11 @@ export const agregarOActualizarItem = async (request, reply) => {
     if (!producto) {
       return reply.code(404).send({ mensaje: 'Producto no encontrado' });
     }
+
+    // Validar que el producto esté disponible
+    if (!producto.disponible) {
+      return reply.code(400).send({ mensaje: 'Este producto no está disponible actualmente' });
+    }
     
     const carrito = await getOrCreateCarrito(usuarioId);
     const itemExistente = carrito.items.find(

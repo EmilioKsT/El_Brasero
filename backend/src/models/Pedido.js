@@ -49,7 +49,7 @@ const pedidoSchema = new Schema({
     required: true
   },
   
-  // Estado inicial del pedido, como pide el DoR [cite: 29]
+  // Estado inicial del pedido
   estado: {
     type: String,
     required: true,

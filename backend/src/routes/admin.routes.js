@@ -1,7 +1,11 @@
 import {
   obtenerPedidosAdmin,
   actualizarEstadoPedido,
-  crearAdmin
+  crearAdmin,
+  obtenerProductosAdmin,
+  crearProducto,
+  actualizarProducto,
+  eliminarProducto
 } from '../controllers/admin.controller.js';
 import { verifyJWT, verifyAdmin } from '../middlewares/auth.middleware.js';
 
@@ -66,4 +70,49 @@ export default async function adminRoutes(fastify, options) {
   }, crearAdmin);
   
   console.log('   POST /api/admin/crear-admin');
+
+  // GET /api/admin/productos (Listar productos para el admin)
+  fastify.get('/productos', {
+    schema: {
+      description: 'Obtener lista de productos (Admin B-16)',
+      tags: ['Admin'],
+      security: [{ bearerAuth: [] }]
+    }
+  }, obtenerProductosAdmin);
+
+  // POST /api/admin/productos (Crear producto)
+  fastify.post('/productos', {
+    schema: {
+      description: 'Crear un producto (Admin B-16)',
+      tags: ['Admin'],
+      security: [{ bearerAuth: [] }]
+      // Aquí iría el schema del body para validar la entrada
+    }
+  }, crearProducto);
+
+  // PUT /api/admin/productos/:id (Actualizar producto)
+  fastify.put('/productos/:id', {
+    schema: {
+      description: 'Actualizar un producto (Admin B-16)',
+      tags: ['Admin'],
+      security: [{ bearerAuth: [] }],
+      params: { /* ... */ }
+    }
+  }, actualizarProducto);
+
+  // DELETE /api/admin/productos/:id (Eliminar producto)
+  fastify.delete('/productos/:id', {
+    schema: {
+      description: 'Eliminar un producto (Admin B-16)',
+      tags: ['Admin'],
+      security: [{ bearerAuth: [] }],
+      params: { /* ... */ }
+    }
+  }, eliminarProducto);
+  
+  console.log('   GET  /api/admin/productos');
+  console.log('   POST /api/admin/productos');
+  console.log('   PUT  /api/admin/productos/:id');
+  console.log('   DELETE /api/admin/productos/:id');
+
 }

@@ -1,47 +1,13 @@
 import Producto from '../models/Productos.js';
 
-/**
- * [ADMIN] POST /api/productos
- * Crear un nuevo producto
- */
-export const crearProducto = async (request, reply) => {
-  try {
-    // request.body ya está validado (en un futuro) por el schema de Fastify,
-    // pero Mongoose también validará.
-    const nuevoProducto = new Producto(request.body);
-    await nuevoProducto.save();
-    
-    console.log(`📦 Producto creado: ${nuevoProducto.nombre} (ID: ${nuevoProducto._id})`);
-    
-    return reply.code(201).send({
-      exito: true,
-      mensaje: 'Producto creado exitosamente',
-      producto: nuevoProducto
-    });
-    
-  } catch (error) {
-    // Error de validación de Mongoose
-    if (error.name === 'ValidationError') {
-      const mensajes = Object.values(error.errors).map(err => err.message);
-      console.log(`Error de validación:`, mensajes);
-      
-      return reply.code(400).send({
-        error: 'Validación fallida',
-        mensaje: mensajes[0] || 'Datos inválidos'
-      });
-    }
-    
-    console.error('Error al crear producto:', error);
-    return reply.code(500).send({
-      error: 'Error del servidor',
-      mensaje: 'Error al crear el producto'
-    });
-  }
-};
+// === LÓGICA DE ADMIN MOVIDA A admin.controller.js ===
+// Se eliminan: crearProducto, actualizarProducto, eliminarProducto
+// Esas funciones ahora están en admin.controller.js para cumplir con B-16
+// ===
 
 /**
- * [PÚBLICO] GET /api/productos (MODIFICADO PARA B-09)
- * Obtener todos los productos (con filtros)
+ * [PÚBLICO] GET /api/productos
+ * Obtener todos los productos (con filtros para el catálogo B-09)
  */
 export const obtenerProductos = async (request, reply) => {
   try {
@@ -52,19 +18,17 @@ export const obtenerProductos = async (request, reply) => {
     const query = {};
 
     // Filtro de búsqueda por texto (q)
-    // Coincide con el "Escenario 1: Búsqueda por texto"
     if (q) {
       // 'i' significa case-insensitive (ignora mayúsculas/minúsculas)
       query.nombre = new RegExp(q, 'i'); 
     }
 
-    // Filtro por categoría (Escenario 2)
-    // Nota: El DoR dice ?categoria=Bebidas
+    // Filtro por categoría
     if (categoria) {
       query.categoria = categoria;
     }
 
-    // Filtro por rango de precio (Escenario 3)
+    // Filtro por rango de precio
     if (min || max) {
       query.precio = {};
       // $gte = greater than or equal (mayor o igual)
@@ -75,21 +39,18 @@ export const obtenerProductos = async (request, reply) => {
       if (max) {
         query.precio.$lte = parseInt(max, 10);
       }
-      // Esto cubre el precio "entre 8.000 y 15.000 (inclusive)"
     }
 
-    console.log('Filtrando productos con:', query);
+    console.log('Filtrando productos (público) con:', query);
 
     // 3. Ejecutar la consulta con los filtros
     const productos = await Producto.find(query)
                                     .sort({ categoria: 1, nombre: 1 });
     
-    // Si productos es un array vacío, el frontend se encargará
-    // de mostrar "No se encontraron productos"
     return reply.code(200).send(productos);
     
   } catch (error) {
-    console.error('Error al obtener productos:', error);
+    console.error('Error al obtener productos (público):', error);
     return reply.code(500).send({
       error: 'Error del servidor',
       mensaje: 'Error al obtener los productos'
@@ -99,7 +60,7 @@ export const obtenerProductos = async (request, reply) => {
 
 /**
  * [PÚBLICO] GET /api/productos/:id
- * Obtener un producto por ID (para la pág. de detalle)
+ * Obtener un producto por ID (para la pág. de detalle B-10)
  */
 export const obtenerProductoPorId = async (request, reply) => {
   try {
@@ -117,7 +78,7 @@ export const obtenerProductoPorId = async (request, reply) => {
     return reply.code(200).send(producto);
     
   } catch (error) {
-    console.error('Error al obtener producto por ID:', error);
+    console.error('Error al obtener producto por ID (público):', error);
     if (error.name === 'CastError') {
       return reply.code(404).send({
         error: 'ID inválido',
@@ -127,94 +88,6 @@ export const obtenerProductoPorId = async (request, reply) => {
     return reply.code(500).send({
       error: 'Error del servidor',
       mensaje: 'Error al obtener el producto'
-    });
-  }
-};
-
-/**
- * [ADMIN] PUT /api/productos/:id
- * Actualizar un producto
- */
-export const actualizarProducto = async (request, reply) => {
-  try {
-    const { id } = request.params;
-    
-    const producto = await Producto.findByIdAndUpdate(
-      id,
-      request.body,
-      { 
-        new: true, // Devuelve el documento actualizado
-        runValidators: true // Corre las validaciones del schema al actualizar
-      }
-    );
-    
-    if (!producto) {
-      return reply.code(404).send({
-        error: 'No encontrado',
-        mensaje: 'Producto no encontrado'
-      });
-    }
-    
-    console.log(`📦 Producto actualizado: ${producto.nombre}`);
-    
-    return reply.code(200).send({
-      exito: true,
-      mensaje: 'Producto actualizado exitosamente',
-      producto
-    });
-    
-  } catch (error) {
-    if (error.name === 'ValidationError') {
-      const mensajes = Object.values(error.errors).map(err => err.message);
-      return reply.code(400).send({
-        error: 'Validación fallida',
-        mensaje: mensajes[0] || 'Datos inválidos'
-      });
-    }
-    console.error('Error al actualizar producto:', error);
-    return reply.code(500).send({
-      error: 'Error del servidor',
-      mensaje: 'Error al actualizar el producto'
-    });
-  }
-};
-
-/**
- * [ADMIN] DELETE /api/productos/:id
- * Eliminar un producto
- */
-export const eliminarProducto = async (request, reply) => {
-  try {
-    const { id } = request.params;
-    
-    const producto = await Producto.findByIdAndDelete(id);
-    
-    if (!producto) {
-      return reply.code(404).send({
-        error: 'No encontrado',
-        mensaje: 'Producto no encontrado'
-      });
-    }
-    
-    console.log(`📦 Producto eliminado: ${producto.nombre}`);
-    
-    return reply.code(200).send({
-      exito: true,
-      mensaje: 'Producto eliminado exitosamente',
-      productoId: id
-    });
-    
-  } catch (error) {
-    console.error('Error al eliminar producto:', error);
-    if (error.name === 'CastError') {
-      return reply.code(404).send({
-        error: 'ID inválido',
-        mensaje: 'Producto no encontrado'
-      });
-    }
-    return reply.code(500).send({
-      error: 'Error del servidor',
-      mensaje: 'Error al eliminar el producto'
     });
   }
 };

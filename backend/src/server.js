@@ -8,6 +8,7 @@ import perfilRoutes from './routes/perfil.routes.js';
 import productoRoutes from './routes/producto.routes.js'; 
 import carritoRoutes from './routes/carrito.routes.js';
 import pedidoRoutes from './routes/pedido.routes.js';
+import pagoRoutes from './routes/pago.routes.js';
 
 // Cargar variables de entorno
 dotenv.config();
@@ -69,6 +70,8 @@ await fastify.register(carritoRoutes, { prefix: '/api/carrito' });
 // Registrar rutas de pedidos
 await fastify.register(pedidoRoutes, { prefix: '/api/pedidos' });
 
+// Registrar rutas de pagos
+await fastify.register(pagoRoutes, { prefix: '/api/pagos' });
 
 // ============================================
 // INICIAR SERVIDOR
@@ -88,33 +91,10 @@ const start = async () => {
     
     console.log('');
     console.log('🔒 ============================================');
-    console.log(`🔒 EL BRASERO - ZERO TRUST ARCHITECTURE`);
+    console.log(`🔒 EL BRASERO `);
     console.log('🔒 ============================================');
     console.log(`🚀 Servidor: http://localhost:${PORT}`);
-    console.log('');
-    console.log('📡 Endpoints disponibles:');
-    console.log('   GET  /');
-    console.log('   GET  /health');
-    console.log('');
-    console.log('🔓 PÚBLICOS:');
-    console.log('   POST /api/auth/register');
-    console.log('   POST /api/auth/login (→ accessToken 15m + refreshToken 7d)');
-    console.log('   POST /api/auth/refresh (renovar accessToken)');
-    console.log('   POST /api/auth/logout (revocar 1 sesión)');
-    console.log('   POST /api/auth/recovery/request');
-    console.log('   POST /api/auth/recovery/validate');
-    console.log('   POST /api/auth/recovery/reset');
-    console.log('');
-    console.log('🔒 PROTEGIDOS (requieren JWT):');
-    console.log('   GET  /api/auth/perfil');
-    console.log('   PUT  /api/auth/perfil');
-    console.log('   POST /api/auth/logout-all (cerrar TODAS las sesiones)');
-    console.log('');
-    console.log('🛡️  ZTA ACTIVO:');
-    console.log('   ✅ Cada request: JWT + Usuario activo + Token válido');
-    console.log('   ✅ Access Token: 15 minutos (renovable)');
-    console.log('   ✅ Refresh Token: 7 días (revocable)');
-    console.log('');
+ 
     
   } catch (err) {
     fastify.log.error(err);

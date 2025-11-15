@@ -7,6 +7,7 @@ import authRoutes from './routes/auth.routes.js';
 import perfilRoutes from './routes/perfil.routes.js';
 import productoRoutes from './routes/producto.routes.js'; 
 import carritoRoutes from './routes/carrito.routes.js';
+import pedidoRoutes from './routes/pedido.routes.js';
 
 // Cargar variables de entorno
 dotenv.config();
@@ -64,6 +65,10 @@ await fastify.register(productoRoutes, { prefix: '/api/productos' });
 
 // Registrar rutas de carrito
 await fastify.register(carritoRoutes, { prefix: '/api/carrito' });
+
+// Registrar rutas de pedidos
+await fastify.register(pedidoRoutes, { prefix: '/api/pedidos' });
+
 
 // ============================================
 // INICIAR SERVIDOR

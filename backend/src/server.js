@@ -87,7 +87,7 @@ const start = async () => {
     await connectDB();
     
     // 2. Levantar servidor
-    const PORT = process.env.PORT || 3000;
+    const PORT = process.env.PORT;
     await fastify.listen({ 
       port: PORT,
       host: '0.0.0.0' // Escuchar en todas las interfaces

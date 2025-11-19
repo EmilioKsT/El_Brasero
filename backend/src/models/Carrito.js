@@ -11,7 +11,7 @@ const itemCarritoSchema = new Schema({
   cantidad: {
     type: Number,
     required: true,
-    min: [1, 'La cantidad mínima es 1'],
+    min: [1,],
     default: 1
   }
 }, {

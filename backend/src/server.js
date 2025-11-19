@@ -31,7 +31,7 @@ await fastify.register(cors, {
 
 // Configurar JWT
 await fastify.register(jwt, {
-  secret: process.env.JWT_SECRET || 'brasero_jwt_secret_2024_super_seguro'
+  secret: process.env.JWT_SECRET
 });
 
 // ============================================

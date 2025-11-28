@@ -1,60 +1,49 @@
 import Producto from '../models/Productos.js';
 
-// === LÓGICA DE ADMIN MOVIDA A admin.controller.js ===
-// Se eliminan: crearProducto, actualizarProducto, eliminarProducto
-// Esas funciones ahora están en admin.controller.js para cumplir con B-16
-// ===
-
-/**
- * [PÚBLICO] GET /api/productos
- * Obtener todos los productos (con filtros para el catálogo B-09)
- */
 export const obtenerProductos = async (request, reply) => {
   try {
-    // 1. Extraer los query parameters
+    // 1. Obtener parámetros de paginación (con valores por defecto)
+    // Page 1, 8 productos por página si no se especifica nada
+    const page = parseInt(request.query.page) || 1;
+    const limit = parseInt(request.query.limit) || 8;
+    const skip = (page - 1) * limit;
+
+    // Filtros existentes (búsqueda, categoría, precio)
     const { q, categoria, min, max } = request.query;
-
-    // 2. Construir el objeto de consulta (filtro)
     const query = {};
-
-    // Filtro de búsqueda por texto (q)
-    if (q) {
-      // 'i' significa case-insensitive (ignora mayúsculas/minúsculas)
-      query.nombre = new RegExp(q, 'i'); 
-    }
-
-    // Filtro por categoría
-    if (categoria) {
-      query.categoria = categoria;
-    }
-
-    // Filtro por rango de precio
+    if (q) query.nombre = new RegExp(q, 'i');
+    if (categoria && categoria !== 'Todas') query.categoria = categoria;
     if (min || max) {
       query.precio = {};
-      // $gte = greater than or equal (mayor o igual)
-      if (min) {
-        query.precio.$gte = parseInt(min, 10);
-      }
-      // $lte = less than or equal (menor o igual)
-      if (max) {
-        query.precio.$lte = parseInt(max, 10);
-      }
+      if (min) query.precio.$gte = parseInt(min);
+      if (max) query.precio.$lte = parseInt(max);
     }
-
-    console.log('Filtrando productos (público) con:', query);
-
-    // 3. Ejecutar la consulta con los filtros
-    const productos = await Producto.find(query)
-                                    .sort({ categoria: 1, nombre: 1 });
     
-    return reply.code(200).send(productos);
+    // 2. Consultar productos con paginación y filtros
+    const [productos, total] = await Promise.all([
+      Producto.find(query)
+        .sort({ categoria: 1, nombre: 1 })
+        .skip(skip)
+        .limit(limit),
+      Producto.countDocuments(query)
+    ]);
+
+    const totalPaginas = Math.ceil(total / limit);
+
+    // 3. Responder con metadatos de paginación
+    return reply.code(200).send({
+      productos,
+      paginacion: {
+        total,
+        page,
+        limit,
+        totalPaginas
+      }
+    });
     
   } catch (error) {
-    console.error('Error al obtener productos (público):', error);
-    return reply.code(500).send({
-      error: 'Error del servidor',
-      mensaje: 'Error al obtener los productos'
-    });
+    console.error('Error al obtener productos:', error);
+    return reply.code(500).send({ error: 'Error del servidor' });
   }
 };
 

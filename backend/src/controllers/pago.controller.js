@@ -37,7 +37,7 @@ export const simularPago = async (request, reply) => {
       pedido.estado = 'Pagado'; // <-- ¡El cambio de estado!
       await pedido.save();
       
-      console.log(`✅ Pago (simulado) exitoso para Pedido ${pedido._id}`);
+      console.log(`Pago (simulado) exitoso para Pedido ${pedido._id}`);
       
       return reply.code(200).send({
         exito: true,
@@ -47,7 +47,7 @@ export const simularPago = async (request, reply) => {
       
     } else {
       // Escenario 2: Pago fallido
-      console.log(`❌ Pago (simulado) fallido para Pedido ${pedido._id}`);
+      console.log(`Pago (simulado) fallido para Pedido ${pedido._id}`);
       
       return reply.code(400).send({
         exito: false,

@@ -72,11 +72,5 @@ export default async function carritoRoutes(fastify, options) {
       security: [{ bearerAuth: [] }]
     }
   }, vaciarCarrito);
-
-  console.log('Rutas de carrito registradas:');
-  console.log('   GET  /api/carrito/resumen (Protegido)');
-  console.log('   GET  /api/carrito (Protegido)');
-  console.log('   POST /api/carrito/items (Protegido)');
-  console.log('   DELETE /api/carrito/items/:id (Protegido)');
-  console.log('   DELETE /api/carrito (Protegido)');
+  
 }

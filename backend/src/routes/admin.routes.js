@@ -14,8 +14,6 @@ export default async function adminRoutes(fastify, options) {
   // Aplicar ZTA (JWT + Rol Admin) a TODAS las rutas de este archivo
   fastify.addHook('preHandler', verifyJWT);
   fastify.addHook('preHandler', verifyAdmin);  
-  console.log('Rutas de ADMIN (/api/admin) registradas:');
-
   // === B-17: Rutas de Pedidos ===
   
   // GET /api/admin/pedidos (Listar todos los pedidos)
@@ -47,8 +45,6 @@ export default async function adminRoutes(fastify, options) {
     }
   }, actualizarEstadoPedido);
   
-  console.log('   GET  /api/admin/pedidos');
-  console.log('   PUT  /api/admin/pedidos/:id/estado');
 
   // === Nueva Feature: Crear Admin ===
 
@@ -69,7 +65,6 @@ export default async function adminRoutes(fastify, options) {
     }
   }, crearAdmin);
   
-  console.log('   POST /api/admin/crear-admin');
 
   // GET /api/admin/productos (Listar productos para el admin)
   fastify.get('/productos', {
@@ -110,9 +105,4 @@ export default async function adminRoutes(fastify, options) {
     }
   }, eliminarProducto);
   
-  console.log('   GET  /api/admin/productos');
-  console.log('   POST /api/admin/productos');
-  console.log('   PUT  /api/admin/productos/:id');
-  console.log('   DELETE /api/admin/productos/:id');
-
 }

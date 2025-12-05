@@ -69,7 +69,7 @@ export const confirmarPedido = async (request, reply) => {
     carrito.items = [];
     await carrito.save();
     
-    console.log(`✅ Pedido ${nuevoPedido._id} creado para usuario ${usuarioId}`);
+    console.log(`Pedido ${nuevoPedido._id} creado para usuario ${usuarioId}`);
 
     // 6. Responder con el ID del pedido
     return reply.code(200).send({

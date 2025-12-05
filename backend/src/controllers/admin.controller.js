@@ -198,7 +198,7 @@ export const actualizarProducto = async (request, reply) => {
       });
     }
     
-    console.log(`📦 [Admin] Producto actualizado: ${producto.nombre}`);
+    console.log(`[Admin] Producto actualizado: ${producto.nombre}`);
     
     return reply.code(200).send({
       exito: true,
@@ -239,7 +239,7 @@ export const eliminarProducto = async (request, reply) => {
       });
     }
     
-    console.log(`📦 [Admin] Producto eliminado: ${producto.nombre}`);
+    console.log(`[Admin] Producto eliminado: ${producto.nombre}`);
     
     return reply.code(200).send({
       exito: true,

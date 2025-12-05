@@ -94,10 +94,10 @@ const start = async () => {
     });
     
     console.log('');
-    console.log('🔒 ============================================');
-    console.log(`🔒 EL BRASERO `);
-    console.log('🔒 ============================================');
-    console.log(`🚀 Servidor: http://localhost:${PORT}`);
+    console.log('============================================');
+    console.log(`EL BRASERO `);
+    console.log('============================================');
+    console.log(`Servidor: http://localhost:${PORT}`);
  
     
   } catch (err) {

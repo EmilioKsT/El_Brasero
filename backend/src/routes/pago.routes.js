@@ -31,9 +31,5 @@ export default async function pagoRoutes(fastify, options) {
     }
   }, simularPago);
 
-  // NOTA: Los endpoints /iniciar y /callback del DoR  
-  // se implementarían aquí en una integración real.
 
-  console.log('Rutas de pagos (simuladas) registradas:');
-  console.log('   POST /api/pagos/simular (Protegido)');
 }

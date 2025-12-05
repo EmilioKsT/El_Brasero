@@ -43,7 +43,7 @@ RefreshTokenSchema.statics.isValid = async function(tokenValue) {
   }).populate('usuarioId');
   
   if (token && token.usuarioId && !token.usuarioId.activo) {
-    console.log(`⚠️  ZTA: Usuario ${token.usuarioId._id} desactivado`);
+    console.log(`ZTA: Usuario ${token.usuarioId._id} desactivado`);
     await token.revoke();
     return null;
   }
@@ -57,7 +57,7 @@ RefreshTokenSchema.statics.revokeAllByUser = async function(usuarioId) {
     { $set: { isRevoked: true } }
   );
   
-  console.log(`🔒 Revocados ${result.modifiedCount} tokens`);
+  console.log(`Revocados ${result.modifiedCount} tokens`);
   return result.modifiedCount;
 };
 

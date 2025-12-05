@@ -29,7 +29,4 @@ export default async function productoRoutes(fastify, options) {
     }
   }, obtenerProductoPorId);
 
-  console.log('Rutas de productos (PÚBLICAS) registradas:');
-  console.log('   GET  /api/productos (Público)');
-  console.log('   GET  /api/productos/:id (Público)');
  }

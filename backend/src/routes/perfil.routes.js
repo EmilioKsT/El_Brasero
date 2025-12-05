@@ -132,8 +132,4 @@ export default async function perfilRoutes(fastify, options) {
       }
     }
   }, actualizarPerfil);
-  
-  console.log('Rutas de perfil registradas:');
-  console.log('GET  /api/auth/perfil (protegido)');
-  console.log('PUT  /api/auth/perfil (protegido)');
 }

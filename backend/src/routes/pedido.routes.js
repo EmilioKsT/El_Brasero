@@ -69,7 +69,4 @@ export default async function pedidoRoutes(fastify, options) {
   }, obtenerConfirmacion);
   
 
-  console.log('Rutas de pedidos registradas:');
-  console.log('   POST /api/pedidos/confirmar (Protegido)');
-  console.log('   GET  /api/pedidos/confirmacion/:orderId (Protegido)');
 }

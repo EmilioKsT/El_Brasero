@@ -42,8 +42,6 @@ carritoSchema.methods.calcularTotalItems = function() {
   return this.items.reduce((total, item) => total + item.cantidad, 0);
 };
 
-// Índice para encontrar rápido el carrito de un usuario
-carritoSchema.index({ usuario: 1 });
 
 const Carrito = mongoose.model('Carrito', carritoSchema);
 export default Carrito;

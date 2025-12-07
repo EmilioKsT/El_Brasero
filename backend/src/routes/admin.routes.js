@@ -91,7 +91,12 @@ export default async function adminRoutes(fastify, options) {
       description: 'Actualizar un producto (Admin B-16)',
       tags: ['Admin'],
       security: [{ bearerAuth: [] }],
-      params: { /* ... */ }
+      params: { 
+        type: 'object',
+        properties: {
+          id: { type: 'string' , description: 'ID del producto' } }
+      }
+      // Aquí iría el schema del body para validar la entrada
     }
   }, actualizarProducto);
 
@@ -101,7 +106,11 @@ export default async function adminRoutes(fastify, options) {
       description: 'Eliminar un producto (Admin B-16)',
       tags: ['Admin'],
       security: [{ bearerAuth: [] }],
-      params: { /* ... */ }
+      params: { 
+        type: 'object',
+        properties: {
+          id: { type: 'string' , description: 'ID del producto' } }
+      }
     }
   }, eliminarProducto);
   

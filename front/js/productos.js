@@ -183,8 +183,7 @@ function renderizarGrid(listaProductos) {
                         <p class="card-text fw-bold text-primary mb-auto">${precio}</p>
                         <div class="d-grid gap-2 mt-3">
                             <a href="./detalles.html?id=${prod._id}" class="btn btn-outline-primary btn-sm">Ver detalle</a>
-                            <button class="btn btn-primary btn-sm" onclick="alert('Próximamente: Carrito')">Agregar</button>
-                        </div>
+                            <button class="btn btn-primary btn-sm" onclick="window.agregarRapido('${prod._id}')">Agregar</button>
                     </div>
                 </div>
             </div>
@@ -237,4 +236,60 @@ window.cambiarPagina = (nuevaPagina) => {
     estadoActual.page = nuevaPagina;
     cargarProductos();
     window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+// front/js/productos.js (Al final del archivo)
+
+window.agregarRapido = async (productoId) => {
+    // 1. Validar sesión
+    if (!AuthService.estaLogueado()) {
+        alert("Inicia sesión para comprar");
+        window.location.href = './login.html';
+        return;
+    }
+
+    try {
+        const token = AuthService.obtenerToken();
+        
+        // 2. Petición POST al carrito
+        const respuesta = await fetch(`${API_URL}/carrito/items`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                productoId: productoId,
+                cantidad: 1 // Agrega de a 1 desde el grid
+            })
+        });
+
+        if (respuesta.ok) {
+            // 3. ¡AQUÍ ESTÁ LA MAGIA! 
+            // Llamamos a la función global que creamos en navbar.js
+            if (window.actualizarBadgeGlobal) {
+                window.actualizarBadgeGlobal();
+            }
+            
+            // Feedback visual simple (opcional: podrías usar un Toast mejor)
+            console.log("Producto agregado al carrito");
+
+            const btn = document.activeElement;
+            if(btn && btn.tagName === 'BUTTON') {
+                const textoOriginal = btn.innerText;
+                btn.innerText = "✔ Agregado";
+                btn.classList.replace('btn-primary', 'btn-success');
+                setTimeout(() => {
+                    btn.innerText = textoOriginal;
+                    btn.classList.replace('btn-success', 'btn-primary');
+                }, 1000);
+            }
+
+        } else {
+            console.error("Error al agregar");
+        }
+
+    } catch (error) {
+        console.error(error);
+    }
 };

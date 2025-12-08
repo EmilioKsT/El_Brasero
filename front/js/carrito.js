@@ -10,13 +10,14 @@ if (!AuthService.estaLogueado()) {
 const tbodyDesktop = document.getElementById('b11-tbody');
 const containerMobile = document.getElementById('b11-cards');
 const emptyState = document.getElementById('b11-empty');
-const contenidoPrincipal = document.querySelector('.row.g-4'); // El contenedor de la tabla y resumen
+const desktopContainer = document.getElementById('b11-desktop'); 
+
 const spanTotal = document.getElementById('b11-total');
 const spanTotalMobile = document.getElementById('b11-total-m');
 const btnCheckout = document.getElementById('b11-checkout');
 const btnCheckoutMobile = document.getElementById('b11-checkout-m');
 const btnVaciar = document.getElementById('b11-clear');
-const badgeNav = document.getElementById('navCartCount'); // Badge del navbar
+const badgeNav = document.getElementById('navCartCount'); 
 
 // Formateador de moneda
 const formatoCLP = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' });
@@ -28,23 +29,28 @@ async function cargarCarrito() {
     try {
         const token = AuthService.obtenerToken();
         
-        // Fetch al Backend
         const respuesta = await fetch(`${API_URL}/carrito`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
 
         if (!respuesta.ok) throw new Error('Error al cargar carrito');
 
-        const data = await respuesta.json(); // { items: [], total: 0, totalItems: 0 }
+        const data = await respuesta.json(); 
 
-        // Actualizar Badge del Navbar (Global)
-        if(badgeNav) badgeNav.textContent = data.totalItems || 0;
+        // Actualizar badge del navbar
+        if (badgeNav) {
+            badgeNav.textContent = data.totalItems || 0;
+            if (data.totalItems > 0) {
+                badgeNav.classList.remove('d-none');
+            } else {
+                badgeNav.classList.add('d-none');
+            }
+        }
 
         renderizarVista(data);
 
     } catch (error) {
-        console.error(error);
-        alert("No se pudo cargar el carrito.");
+        console.error('Error al cargar carrito:', error);
     }
 }
 
@@ -57,89 +63,137 @@ function renderizarVista(data) {
 
     // 1. Manejo de Estado Vacío
     if (items.length === 0) {
-        emptyState.classList.remove('d-none'); // Mostrar mensaje vacío
-        contenidoPrincipal.classList.remove('d-md-flex'); // Hack para ocultar el row flex
-        contenidoPrincipal.classList.add('d-none');
+        emptyState.classList.remove('d-none');
+        
+        // ✅ CORREGIDO: Ocultar completamente el contenedor desktop
+        if (desktopContainer) {
+            desktopContainer.classList.add('d-none');
+            desktopContainer.classList.remove('d-md-flex');
+        }
+        
         containerMobile.innerHTML = '';
         
-        // Deshabilitar botones checkout
+        btnCheckout.classList.add('disabled');
         btnCheckoutMobile.classList.add('disabled');
+        
+        // Resetear totales
+        if (spanTotal) spanTotal.textContent = formatoCLP.format(0);
+        if (spanTotalMobile) spanTotalMobile.textContent = formatoCLP.format(0);
+        
         return;
     }
 
-    // Si hay items, mostramos el contenido
+    // 2. Estado Con Productos
     emptyState.classList.add('d-none');
-    contenidoPrincipal.classList.remove('d-none');
-    contenidoPrincipal.classList.add('d-md-flex');
+    
+    // ✅ CORREGIDO: Mostrar el contenedor desktop SOLO en pantallas md+
+    if (desktopContainer) {
+        desktopContainer.classList.remove('d-none');
+        desktopContainer.classList.add('d-md-flex');
+    }
+    
     btnCheckout.classList.remove('disabled');
     btnCheckoutMobile.classList.remove('disabled');
 
-    // 2. Render Desktop (Tabla)
+    // 3. Render Desktop (Tabla)
     let htmlDesktop = '';
     items.forEach(item => {
         htmlDesktop += `
             <tr>
                 <td>
                     <div class="d-flex align-items-center">
-                        <img src="${item.imagenUrl || './img/logo.png'}" class="rounded me-2" width="40" height="40" style="object-fit:cover">
+                        <img src="${item.imagenUrl || './img/logo.png'}" class="rounded me-2" width="40" height="40" style="object-fit:cover" alt="${item.nombre}">
                         <span class="small fw-semibold">${item.nombre}</span>
                     </div>
                 </td>
                 <td class="text-end">${formatoCLP.format(item.precio)}</td>
                 <td class="text-center">
-                    <input type="number" min="1" max="10" class="form-control form-control-sm mx-auto" 
-                           style="width: 60px;" value="${item.cantidad}"
-                           onchange="actualizarCantidad('${item.producto}', this.value)">
+                    <input type="number" min="1" max="99" class="form-control form-control-sm mx-auto cantidad-input" 
+                           style="width: 70px;" value="${item.cantidad}"
+                           data-producto-id="${item.producto}">
                 </td>
                 <td class="text-end fw-bold">${formatoCLP.format(item.subtotal)}</td>
                 <td class="text-center">
-                    <button class="btn btn-sm btn-outline-danger" onclick="eliminarItem('${item.producto}')">
-                        &times;
+                    <button class="btn btn-sm btn-outline-danger btn-eliminar" 
+                            data-producto-id="${item.producto}"
+                            title="Eliminar producto">
+                        ×
                     </button>
                 </td>
             </tr>
         `;
     });
-    tbodyDesktop.innerHTML = htmlDesktop;
+    if (tbodyDesktop) tbodyDesktop.innerHTML = htmlDesktop;
 
-    // 3. Render Móvil (Cards)
+    // 4. Render Móvil (Cards)
     let htmlMobile = '';
     items.forEach(item => {
         htmlMobile += `
             <div class="card shadow-sm">
                 <div class="card-body d-flex gap-3">
-                    <img src="${item.imagenUrl || './img/logo.png'}" class="rounded" width="60" height="60" style="object-fit:cover">
+                    <img src="${item.imagenUrl || './img/logo.png'}" class="rounded" width="60" height="60" style="object-fit:cover" alt="${item.nombre}">
                     <div class="flex-grow-1">
-                        <h6 class="mb-1 text-truncate">${item.nombre}</h6>
+                        <h6 class="mb-1">${item.nombre}</h6>
                         <div class="text-muted small mb-2">${formatoCLP.format(item.precio)}</div>
                         <div class="d-flex justify-content-between align-items-center">
-                            <input type="number" min="1" max="10" class="form-control form-control-sm" 
-                                   style="width: 60px;" value="${item.cantidad}"
-                                   onchange="actualizarCantidad('${item.producto}', this.value)">
-                            <button class="btn btn-sm btn-link text-danger text-decoration-none" 
-                                    onclick="eliminarItem('${item.producto}')">Eliminar</button>
+                            <input type="number" min="1" max="99" class="form-control form-control-sm cantidad-input" 
+                                   style="width: 70px;" value="${item.cantidad}"
+                                   data-producto-id="${item.producto}">
+                            <button class="btn btn-sm btn-link text-danger text-decoration-none btn-eliminar" 
+                                    data-producto-id="${item.producto}">
+                                Eliminar
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
         `;
     });
-    containerMobile.innerHTML = htmlMobile;
+    if (containerMobile) containerMobile.innerHTML = htmlMobile;
 
-    // 4. Actualizar Totales
+    // 5. Actualizar Totales
     const totalFormateado = formatoCLP.format(total);
-    spanTotal.textContent = totalFormateado;
-    spanTotalMobile.textContent = totalFormateado;
+    if (spanTotal) spanTotal.textContent = totalFormateado;
+    if (spanTotalMobile) spanTotalMobile.textContent = totalFormateado;
 }
 
 // ==========================================
-// C. ACCIONES (POST / DELETE)
+// C. ACCIONES - Event Delegation (MEJORADO)
 // ==========================================
 
-// C1. Cambiar Cantidad (POST - Actualiza si existe)
-window.actualizarCantidad = async (productoId, nuevaCantidad) => {
+// CAMBIAR CANTIDAD - Event delegation
+document.addEventListener('change', async (e) => {
+    if (e.target.classList.contains('cantidad-input')) {
+        const input = e.target;
+        const productoId = input.dataset.productoId;
+        const nuevaCantidad = parseInt(input.value);
+        
+        if (nuevaCantidad < 1 || isNaN(nuevaCantidad)) {
+            input.value = 1;
+            return;
+        }
+
+        await actualizarCantidad(productoId, nuevaCantidad);
+    }
+});
+
+// ✅ ELIMINAR - Event delegation
+document.addEventListener('click', async (e) => {
+    if (e.target.closest('.btn-eliminar')) {
+        e.preventDefault();
+        const btn = e.target.closest('.btn-eliminar');
+        const productoId = btn.dataset.productoId;
+        
+        if (confirm("¿Eliminar este producto del carrito?")) {
+            await eliminarItem(productoId);
+        }
+    }
+});
+
+// Función para actualizar cantidad
+async function actualizarCantidad(productoId, nuevaCantidad) {
     const cantidad = parseInt(nuevaCantidad);
-    if (cantidad < 1) return; // Validación básica
+    if (cantidad < 1) return; 
 
     try {
         const token = AuthService.obtenerToken();
@@ -153,17 +207,19 @@ window.actualizarCantidad = async (productoId, nuevaCantidad) => {
         });
 
         if (res.ok) {
-            cargarCarrito(); // Recargamos todo para recalcular totales
+            console.log('✓ Cantidad actualizada');
+            cargarCarrito(); 
+        } else {
+            alert('Error al actualizar cantidad');
         }
     } catch (error) {
-        console.error(error);
+        console.error('Error:', error);
+        alert('Error de conexión');
     }
-};
+}
 
-// C2. Eliminar Ítem (DELETE)
-window.eliminarItem = async (productoId) => {
-    if(!confirm("¿Eliminar producto?")) return;
-
+// Función para eliminar item
+async function eliminarItem(productoId) {
     try {
         const token = AuthService.obtenerToken();
         const res = await fetch(`${API_URL}/carrito/items/${productoId}`, {
@@ -172,31 +228,41 @@ window.eliminarItem = async (productoId) => {
         });
 
         if (res.ok) {
+            console.log('✓ Producto eliminado');
             cargarCarrito();
+        } else {
+            alert('Error al eliminar producto');
         }
     } catch (error) {
-        console.error(error);
+        console.error('Error:', error);
+        alert('Error de conexión');
     }
-};
+}
 
-// C3. Vaciar Carrito (DELETE ALL)
-btnVaciar.addEventListener('click', async () => {
-    if(!confirm("¿Estás seguro de vaciar todo el carrito?")) return;
+// C3. Vaciar Carrito
+if (btnVaciar) {
+    btnVaciar.addEventListener('click', async () => {
+        if (!confirm("¿Estás seguro de vaciar todo el carrito?")) return;
 
-    try {
-        const token = AuthService.obtenerToken();
-        const res = await fetch(`${API_URL}/carrito`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
+        try {
+            const token = AuthService.obtenerToken();
+            const res = await fetch(`${API_URL}/carrito`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
 
-        if (res.ok) {
-            cargarCarrito();
+            if (res.ok) {
+                console.log('✓ Carrito vaciado');
+                cargarCarrito();
+            } else {
+                alert('Error al vaciar carrito');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error de conexión');
         }
-    } catch (error) {
-        console.error(error);
-    }
-});
+    });
+}
 
 // Inicializar
 document.addEventListener('DOMContentLoaded', cargarCarrito);

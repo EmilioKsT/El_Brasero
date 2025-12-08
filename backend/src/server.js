@@ -23,10 +23,11 @@ const fastify = Fastify({
 // PLUGINS
 // ============================================
 
-// Registrar plugin CORS (permitir peticiones desde el frontend)
 await fastify.register(cors, {
   origin: true, // En desarrollo permite todos los orígenes
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'], // ← AGREGAR ESTA LÍNEA
+  allowedHeaders: ['Content-Type', 'Authorization'] // ← AGREGAR ESTA LÍNEA
 });
 
 // Configurar JWT
@@ -87,7 +88,7 @@ const start = async () => {
     await connectDB();
     
     // 2. Levantar servidor
-    const PORT = process.env.PORT;
+    const PORT = process.env.PORT || 3000;
     await fastify.listen({ 
       port: PORT,
       host: '0.0.0.0' // Escuchar en todas las interfaces

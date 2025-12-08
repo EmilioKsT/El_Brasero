@@ -41,7 +41,7 @@ export const confirmarPedido = async (request, reply) => {
       itemsSnapshot.push({
         producto: item.producto._id,
         nombre: item.producto.nombre,
-        precioUnitARIO: item.producto.precio,
+        precioUnitario: item.producto.precio,
         cantidad: item.cantidad,
         subtotal: subtotal
       });

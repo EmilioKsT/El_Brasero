@@ -153,7 +153,7 @@ export const crearProducto = async (request, reply) => {
     const nuevoProducto = new Producto(request.body);
     await nuevoProducto.save();
     
-    console.log(`📦 [Admin] Producto creado: ${nuevoProducto.nombre}`);
+    console.log(`[Admin] Producto creado: ${nuevoProducto.nombre}`);
     
     return reply.code(201).send({
       exito: true,
@@ -254,5 +254,62 @@ export const eliminarProducto = async (request, reply) => {
       error: 'Error del servidor',
       mensaje: 'Error al eliminar el producto'
     });
+  }
+};
+
+/**
+ * [B-15] GET /api/admin/dashboard
+ * Obtiene KPIs y actividad reciente real para el dashboard.
+ */
+export const obtenerDashboard = async (request, reply) => {
+  try {
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0); // Inicio del día actual
+
+    // 1. KPI: Pedidos de Hoy
+    const pedidosHoy = await Pedido.countDocuments({
+      createdAt: { $gte: hoy }
+    });
+
+    // 2. KPI: Ventas de Hoy (Suma de total de pedidos pagados/entregados hoy)
+    const resultadoVentas = await Pedido.aggregate([
+      { 
+        $match: { 
+          createdAt: { $gte: hoy },
+          estado: { $in: ['Pagado', 'En preparación', 'Despachado', 'Entregado'] } // Solo ventas válidas
+        } 
+      },
+      { 
+        $group: { 
+          _id: null, 
+          totalVentas: { $sum: "$total" } 
+        } 
+      }
+    ]);
+    const ventasHoy = resultadoVentas.length > 0 ? resultadoVentas[0].totalVentas : 0;
+
+    // 3. KPI: En Cocina (Pedidos "En preparación")
+    const enCocina = await Pedido.countDocuments({
+      estado: 'En preparación'
+    });
+
+    // 4. Actividad Reciente (Últimos 5 pedidos)
+    const ultimosPedidos = await Pedido.find()
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .select('estado nombreCliente total createdAt'); // Solo campos necesarios
+
+    return reply.code(200).send({
+      kpis: {
+        pedidosHoy,
+        ventasHoy,
+        enCocina
+      },
+      actividad: ultimosPedidos
+    });
+
+  } catch (error) {
+    console.error('Error al obtener dashboard:', error);
+    return reply.code(500).send({ error: 'Error del servidor' });
   }
 };

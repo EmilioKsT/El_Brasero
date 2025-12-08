@@ -5,7 +5,8 @@ import {
   obtenerProductosAdmin,
   crearProducto,
   actualizarProducto,
-  eliminarProducto
+  eliminarProducto,
+  obtenerDashboard
 } from '../controllers/admin.controller.js';
 import { verifyJWT, verifyAdmin } from '../middlewares/auth.middleware.js';
 
@@ -113,5 +114,13 @@ export default async function adminRoutes(fastify, options) {
       }
     }
   }, eliminarProducto);
+
+  fastify.get('/dashboard', {
+    schema: {
+      description: 'Obtener KPIs y actividad para el dashboard (Admin)',
+      tags: ['Admin'],
+      security: [{ bearerAuth: [] }]
+    }
+  }, obtenerDashboard);
   
 }

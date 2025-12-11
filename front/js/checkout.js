@@ -110,7 +110,7 @@ formCheckout.addEventListener('submit', async (e) => {
         comuna: inComuna.value.trim()
     };
 
-    // 2. Validaciones (según AC Escenarios 2 y 3) [cite: 8-15]
+    // 2. Validaciones (según AC Escenarios 2 y 3)
     if (!payload.nombre || !payload.direccion || !payload.comuna) {
         alert("Completa los campos obligatorios");
         return;
@@ -140,7 +140,7 @@ formCheckout.addEventListener('submit', async (e) => {
         const resultado = await response.json();
 
         if (response.ok) {
-            // [Navegación] Redirigir a Pago (B-13) con el ID de la orden [cite: 7]
+            // [Navegación] Redirigir a Pago (B-13) con el ID de la orden 
             console.log("Pedido creado:", resultado.orderId);
             window.location.href = `./pago.html?orderId=${resultado.orderId}`;
         } else {

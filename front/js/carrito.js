@@ -53,9 +53,8 @@ async function cargarCarrito() {
         console.error('Error al cargar carrito:', error);
     }
 }
-
 // ==========================================
-// B. RENDERIZADO (La lógica "Data -> View")
+// B. RENDERIZADO (SOLO TABLA - UNIFICADO)
 // ==========================================
 function renderizarVista(data) {
     const items = data.items || [];
@@ -65,20 +64,17 @@ function renderizarVista(data) {
     if (items.length === 0) {
         emptyState.classList.remove('d-none');
         
-        // ✅ CORREGIDO: Ocultar completamente el contenedor desktop
-        if (desktopContainer) {
-            desktopContainer.classList.add('d-none');
-            desktopContainer.classList.remove('d-md-flex');
-        }
+        // Ocultar tabla
+        if (desktopContainer) desktopContainer.classList.add('d-none');
         
-        containerMobile.innerHTML = '';
-        
+        // Deshabilitar botones
         btnCheckout.classList.add('disabled');
-        btnCheckoutMobile.classList.add('disabled');
+        if (btnCheckoutMobile) btnCheckoutMobile.classList.add('disabled');
         
         // Resetear totales
-        if (spanTotal) spanTotal.textContent = formatoCLP.format(0);
-        if (spanTotalMobile) spanTotalMobile.textContent = formatoCLP.format(0);
+        const cero = formatoCLP.format(0);
+        if (spanTotal) spanTotal.textContent = cero;
+        if (spanTotalMobile) spanTotalMobile.textContent = cero;
         
         return;
     }
@@ -86,72 +82,60 @@ function renderizarVista(data) {
     // 2. Estado Con Productos
     emptyState.classList.add('d-none');
     
-    // ✅ CORREGIDO: Mostrar el contenedor desktop SOLO en pantallas md+
+    // FORZAR VISIBILIDAD DE LA TABLA SIEMPRE (Eliminamos restricciones responsive)
     if (desktopContainer) {
         desktopContainer.classList.remove('d-none');
-        desktopContainer.classList.add('d-md-flex');
+        // Nos aseguramos que no tenga clases que lo oculten en móvil (como d-none d-md-block)
+        // Al remover d-none, debería verse, pero por seguridad quitamos d-md-block si existiera
+        desktopContainer.classList.remove('d-md-flex', 'd-md-block'); 
+        desktopContainer.classList.add('d-block'); // O d-flex según tu diseño original
+    }
+
+    // OCULTAR/LIMPIAR EL CONTENEDOR DE CARDS (Por si acaso)
+    if (containerMobile) {
+        containerMobile.classList.add('d-none');
+        containerMobile.innerHTML = '';
     }
     
+    // Habilitar botones
     btnCheckout.classList.remove('disabled');
-    btnCheckoutMobile.classList.remove('disabled');
+    if (btnCheckoutMobile) btnCheckoutMobile.classList.remove('disabled');
 
-    // 3. Render Desktop (Tabla)
-    let htmlDesktop = '';
+    // 3. Render Tabla (Única vista)
+    let htmlTabla = '';
     items.forEach(item => {
-        htmlDesktop += `
+        htmlTabla += `
             <tr>
                 <td>
                     <div class="d-flex align-items-center">
                         <img src="${item.imagenUrl || './img/logo.png'}" class="rounded me-2" width="40" height="40" style="object-fit:cover" alt="${item.nombre}">
-                        <span class="small fw-semibold">${item.nombre}</span>
+                        <div class="d-flex flex-column">
+                            <span class="small fw-semibold text-truncate" style="max-width: 150px;">${item.nombre}</span>
+                            <span class="d-md-none text-muted small">${formatoCLP.format(item.precio)}</span>
+                        </div>
                     </div>
                 </td>
-                <td class="text-end">${formatoCLP.format(item.precio)}</td>
+                <td class="text-end d-none d-md-table-cell">${formatoCLP.format(item.precio)}</td>
                 <td class="text-center">
                     <input type="number" min="1" max="99" class="form-control form-control-sm mx-auto cantidad-input" 
-                           style="width: 70px;" value="${item.cantidad}"
+                           style="width: 60px;" value="${item.cantidad}"
                            data-producto-id="${item.producto}">
                 </td>
                 <td class="text-end fw-bold">${formatoCLP.format(item.subtotal)}</td>
                 <td class="text-center">
                     <button class="btn btn-sm btn-outline-danger btn-eliminar" 
                             data-producto-id="${item.producto}"
-                            title="Eliminar producto">
-                        ×
+                            title="Eliminar">
+                        &times;
                     </button>
                 </td>
             </tr>
         `;
     });
-    if (tbodyDesktop) tbodyDesktop.innerHTML = htmlDesktop;
+    
+    if (tbodyDesktop) tbodyDesktop.innerHTML = htmlTabla;
 
-    // 4. Render Móvil (Cards)
-    let htmlMobile = '';
-    items.forEach(item => {
-        htmlMobile += `
-            <div class="card shadow-sm">
-                <div class="card-body d-flex gap-3">
-                    <img src="${item.imagenUrl || './img/logo.png'}" class="rounded" width="60" height="60" style="object-fit:cover" alt="${item.nombre}">
-                    <div class="flex-grow-1">
-                        <h6 class="mb-1">${item.nombre}</h6>
-                        <div class="text-muted small mb-2">${formatoCLP.format(item.precio)}</div>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <input type="number" min="1" max="99" class="form-control form-control-sm cantidad-input" 
-                                   style="width: 70px;" value="${item.cantidad}"
-                                   data-producto-id="${item.producto}">
-                            <button class="btn btn-sm btn-link text-danger text-decoration-none btn-eliminar" 
-                                    data-producto-id="${item.producto}">
-                                Eliminar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-    });
-    if (containerMobile) containerMobile.innerHTML = htmlMobile;
-
-    // 5. Actualizar Totales
+    // 4. Actualizar Totales
     const totalFormateado = formatoCLP.format(total);
     if (spanTotal) spanTotal.textContent = totalFormateado;
     if (spanTotalMobile) spanTotalMobile.textContent = totalFormateado;

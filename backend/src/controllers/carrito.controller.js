@@ -27,6 +27,7 @@ const formatAndCalculateCart = async (carrito) => {
 
   let totalCalculado = 0;
   
+  
   // 2. Calcular subtotales
   const itemsFormateados = carrito.items.map(item => {
     if (!item.producto) return null; // Si el producto fue borrado
